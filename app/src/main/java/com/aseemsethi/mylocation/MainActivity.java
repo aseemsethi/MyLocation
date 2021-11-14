@@ -22,6 +22,8 @@ import com.aseemsethi.mylocation.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MyLocation";
+    public static final String MESSAGE_STATUS = "message_status";
+
     private ActivityMainBinding binding;
 
     @Override
@@ -43,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Log.d(TAG, "call getLocation() ");
                 getLocation(getApplicationContext(), view);
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Getting coordinates..", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
 
             }
