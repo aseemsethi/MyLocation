@@ -8,12 +8,17 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class SingleShotLocationProvider {
-    final String TAG = "MyLocationProv1";
+    final String TAG = "MyLocation SingleShot";
+    static Location lastLocation;
 
     public static interface LocationCallback {
         public void onNewLocationAvailable(GPSCoordinates location);
@@ -24,40 +29,50 @@ public class SingleShotLocationProvider {
     // call usually takes <10ms
 
     public static void requestSingleUpdate(final Context context, final LocationCallback callback) {
-        final String TAG = "MyLocationProv2";
-        final LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        Log.d(TAG, "requestSingleUpdate called");
+        final String TAG = "MyLocation SingleShot1";
+        final LocationManager locationManager = (LocationManager) context.getSystemService
+                (Context.LOCATION_SERVICE);
+        boolean isNetworkEnabled = locationManager.isProviderEnabled
+                (LocationManager.NETWORK_PROVIDER);
         if (isNetworkEnabled) {
-            Log.d(TAG, "network enabled");
+            Log.d(TAG, "requestSingleUpdate - network enabled");
+            lastLocation = new Location(LocationManager.NETWORK_PROVIDER);
             Criteria criteria = new Criteria();
-            criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+            criteria.setAccuracy(Criteria.ACCURACY_FINE);
             if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                     ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "permission not granted");
+                Toast.makeText(context,
+                        "Location permissions not granted", Toast.LENGTH_LONG).show();
                 return;
             }
+            Location lastLocation = locationManager.getLastKnownLocation
+                    (LocationManager.NETWORK_PROVIDER);
+            Log.d(TAG, "Last Loc: " + lastLocation);
             locationManager.requestSingleUpdate(criteria, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-                    callback.onNewLocationAvailable(new GPSCoordinates(location.getLatitude(), location.getLongitude()));
+                    callback.onNewLocationAvailable(new GPSCoordinates(location.getLatitude(),
+                            location.getLongitude()));
                     Log.d(TAG, "onLocChanged");
+                    lastLocation.set(location);
+                    //locationManager.removeUpdates(this::onLocationChanged);
                 }
-
                 @Override
                 public void onStatusChanged(String provider, int status, Bundle extras) {
+                    Log.d(TAG, "onStatusChanged");
                 }
-
                 @Override
                 public void onProviderEnabled(String provider) {
+                    Log.d(TAG, "onProviderChanged");
                 }
-
                 @Override
                 public void onProviderDisabled(String provider) {
+                    Log.d(TAG, "onProviderDisabled");
                 }
             }, null);
         } else {
-            Log.d(TAG, "network not enabled");
+            Log.d(TAG, "requestSingleUpdate - network not enabled");
             boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             if (isGPSEnabled) {
                 Log.d(TAG, "GPS enabled");
@@ -94,6 +109,5 @@ public class SingleShotLocationProvider {
             latitude = (float) theLatitude;
         }
     }
-
 }
 
