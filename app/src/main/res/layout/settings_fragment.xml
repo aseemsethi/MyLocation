@@ -14,7 +14,8 @@
         android:layout_marginTop="50dp"
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
-        android:weightSum="1" >
+        android:weightSum="1"
+        tools:ignore="MissingConstraints">
         <TextView
             android:id="@+id/nameSF"
             android:layout_width="fill_parent"

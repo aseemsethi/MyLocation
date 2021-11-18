@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "com.aseemsethi.mylocation"
-        minSdk 23
+        minSdk 29
         targetSdk 31
         versionCode 1
         versionName "1.0"
@@ -28,24 +28,33 @@ android {
     buildFeatures {
         viewBinding true
     }
+    configurations {
+        all { // You should exclude one of them not both of them
+            //exclude group: "com.android.support", module: "support-core-ui"
+            //exclude group: "com.android.support", module: "support-compat"
+            //exclude group: "androidx.collection", module: "collection-1.1.0"
+            //exclude group: "androidx.core", module: "core:1.6.0"
+        }
+    }
 }
 
 dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.3.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1'
     implementation 'com.google.android.gms:play-services-nearby:18.0.0'
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    implementation 'com.google.android.material:material:1.4.0'
     implementation 'com.google.android.gms:play-services-location:11.0.4'
     def work_version = "2.7.0"
     // (Java only)
     implementation "androidx.work:work-runtime:$work_version"
     implementation "androidx.concurrent:concurrent-futures:1.1.0"
-
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.0.2'
+    implementation 'org.eclipse.paho:org.eclipse.paho.android.service:1.0.2'
+    implementation 'com.google.android.material:material:1.4.0'
 }

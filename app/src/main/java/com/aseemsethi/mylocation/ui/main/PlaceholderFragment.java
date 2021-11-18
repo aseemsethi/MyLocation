@@ -1,5 +1,12 @@
 package com.aseemsethi.mylocation.ui.main;
 
+import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
+import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
+import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+
+import android.Manifest;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +18,9 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -23,6 +33,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
+import com.aseemsethi.mylocation.MainActivity;
 import com.aseemsethi.mylocation.NotificationWorker;
 import com.aseemsethi.mylocation.R;
 import com.aseemsethi.mylocation.databinding.FragmentMainBinding;
@@ -35,6 +46,7 @@ import java.util.concurrent.TimeUnit;
 public class PlaceholderFragment extends Fragment {
     private static final String TAG = "MyLocation PF";
     private static final String ARG_SECTION_NUMBER = "section_number";
+    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
 
     private PageViewModel pageViewModel;
     private FragmentMainBinding binding;
@@ -57,6 +69,7 @@ public class PlaceholderFragment extends Fragment {
             index = getArguments().getInt(ARG_SECTION_NUMBER);
         }
         pageViewModel.setIndex(index);
+        checkLocationPermission();
     }
 
     @Override
@@ -143,5 +156,78 @@ public class PlaceholderFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    public boolean checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(getContext(),
+                ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(getContext(),
+                        ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(getContext(),
+                        ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                    ACCESS_BACKGROUND_LOCATION) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                            ACCESS_COARSE_LOCATION) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                            ACCESS_FINE_LOCATION)) {
+                // Show an explanation to the user *asynchronously
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Location Permission")
+                        .setMessage("Please approve location permissions")
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                Log.d(TAG, "Clicked..................");
+                                //Prompt the user once explanation has been shown
+                                ActivityCompat.requestPermissions(getActivity(),
+                                        new String[]{ACCESS_BACKGROUND_LOCATION,
+                                                ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION},
+                                        MY_PERMISSIONS_REQUEST_LOCATION);
+                            }
+                        }).create().show();
+            } else {
+                Log.d(TAG, "show the dialog..................");
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{ACCESS_BACKGROUND_LOCATION, ACCESS_BACKGROUND_LOCATION,
+                                ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
+            }
+            return false;
+        } else {
+            Log.d(TAG, "Permissions already granted");
+            Toast.makeText(getContext(),
+                    "Permissions already granted", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && (grantResults[0] + grantResults[1] + grantResults[2]
+                        == PackageManager.PERMISSION_GRANTED)) {
+                    // permission was granted, yay! Do the
+                    // location-related task you need to do.
+                    if (ContextCompat.checkSelfPermission(getContext(),
+                            ACCESS_BACKGROUND_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED) {
+                        Log.d(TAG, "Permission granted !!!");
+                    }
+
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    Log.d(TAG, "Permission denied");
+                }
+                return;
+            }
+
+        }
     }
 }
