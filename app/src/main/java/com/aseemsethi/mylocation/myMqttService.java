@@ -13,6 +13,7 @@ import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.TextView;
@@ -52,6 +53,7 @@ public class myMqttService extends Service {
     int counter = 1;
     MqttHelper mqttHelper;
     final static String MQTTSUBSCRIBE_ACTION = "MQTTSUBSCRIBE_ACTION";
+    final static String MQTT_SEND_LOC = "MQTT_SEND_LOC";
     boolean running = false;
 
     public myMqttService() {
@@ -78,6 +80,18 @@ public class myMqttService extends Service {
         } else
             action = intent.getAction();
         Log.d(TAG, "ACTION: " + action);
+        if (action == "MQTT_SEND_LOC") {
+            Log.d(TAG, "Recvd MQTT Send LOC message.....................");
+            Bundle extras = intent.getExtras();
+            if(extras == null) {
+                Log.d(TAG,"null MQTT_SEND_LOC");
+            } else {
+                Log.d(TAG, "MQTT_SEND_LOC");
+                Float lat = (Float) extras.getFloat("lat");
+                Float lon = (Float) extras.getFloat("lon");
+                publish("pmoa", "hello aseem: " + lat + ":" + lon);
+            }
+        }
 
         mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID,
@@ -216,7 +230,7 @@ public class myMqttService extends Service {
                 intent.putExtra("Status", arrOfStr[2].trim());
                 sendBroadcast(intent);
                 Log.d(TAG, "Sent Broadcast.......");
-                publish("pmoa", "hello aseem: " + arrOfStr[0]);
+                //publish("pmoa", "hello aseem: " + arrOfStr[0]);
 
                 sendNotification(msg);
                 if ((arrOfStr[1].trim()).equals("4ffe1a")) {

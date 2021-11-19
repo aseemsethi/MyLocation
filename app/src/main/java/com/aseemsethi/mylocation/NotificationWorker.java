@@ -12,6 +12,8 @@ import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
 import android.os.Build;
 import android.telecom.Call;
 import android.util.Log;
@@ -91,6 +93,8 @@ public class NotificationWorker extends ListenableWorker {
                                 .build();
                         completer.set(Result.success(oData));
                         callback.onResponse(oData);
+                        sendLocToService(location);
+                        //((MainActivity)getActivity()).startChronometer();
                         showNotification("MyLocation", taskDataString != null ?
                                 taskDataString : "GPS data sent");
                     }
@@ -99,6 +103,15 @@ public class NotificationWorker extends ListenableWorker {
         //return null;
     }
 
+    public void sendLocToService(SingleShotLocationProvider.GPSCoordinates location) {
+        Intent serviceIntent = new Intent(getApplicationContext(),
+                myMqttService.class);
+        serviceIntent.setAction(myMqttService.MQTT_SEND_LOC);
+        serviceIntent.putExtra("lat", location.latitude);
+        serviceIntent.putExtra("lon", location.longitude);
+        getApplicationContext().startService(serviceIntent);
+    }
+    /*
     @NonNull
     public Result doWork() {
         Log.d(TAG, "doWork called");
@@ -108,6 +121,7 @@ public class NotificationWorker extends ListenableWorker {
         Data outputData = new Data.Builder().putString(WORK_RESULT, "Jobs Finished").build();
         return Result.success(outputData);
     }
+     */
 
     private void showNotification(String task, String desc) {
         Log.d(TAG, "show notif");
