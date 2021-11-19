@@ -24,17 +24,12 @@ import static java.lang.Thread.sleep;
 public class MqttHelper {
     public MqttAndroidClient mqttAndroidClient;
     final String TAG = "MyLocation MQTTHelper";
-
-    //final String serverUri = "tcp://broker.hivemq.com:1883";
     final String serverUri = "tcp://mqtt.eclipseprojects.io:1883";
-
     final String clientId = UUID.randomUUID().toString();
-    //final String clientId = "ESP32Dev";
     final String subscriptionTopic = "pmoa";
 
     public MqttHelper(Context context){
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
-        Log.d(TAG, "MqttHelper Constructor: " + clientId);
         mqttAndroidClient.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable throwable) {
@@ -65,7 +60,6 @@ public class MqttHelper {
     public void connect(){
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
         mqttConnectOptions.setCleanSession(true); // was false
-        // unregister alarmreceiver to mqttservice
         mqttConnectOptions.setKeepAliveInterval(20);
         mqttConnectOptions.setConnectionTimeout(0);
         try {
@@ -116,7 +110,7 @@ public class MqttHelper {
         try {
             mqttAndroidClient.unsubscribe(subscriptionTopic);
         } catch (MqttException ex) {
-            System.err.println("Exception whilst unsubscribing");
+            System.err.println("Exception while unsubscribing");
             ex.printStackTrace();
         }
     }

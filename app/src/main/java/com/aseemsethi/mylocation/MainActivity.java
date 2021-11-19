@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         Intent serviceIntent = new Intent(getApplicationContext(),
                 myMqttService.class);
         serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
-        serviceIntent.putExtra("topic", "aseemsethi");
+        serviceIntent.putExtra("topic", "pmoa");
         startService(serviceIntent);
     }
 

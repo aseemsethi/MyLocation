@@ -25,6 +25,7 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 
 import kotlin.random.URandomKt;
@@ -215,6 +216,7 @@ public class myMqttService extends Service {
                 intent.putExtra("Status", arrOfStr[2].trim());
                 sendBroadcast(intent);
                 Log.d(TAG, "Sent Broadcast.......");
+                publish("pmoa", "hello aseem: " + arrOfStr[0]);
 
                 sendNotification(msg);
                 if ((arrOfStr[1].trim()).equals("4ffe1a")) {
@@ -228,7 +230,6 @@ public class myMqttService extends Service {
                     //v1.setText(arrOfStr[2]);
                     //sendNotification(msg);
                 }
-
             }
 
             @Override
@@ -236,6 +237,23 @@ public class myMqttService extends Service {
                 Log.d(TAG, "msg delivered");
             }
         });
+    }
+
+    public void publish(String topic, String info)
+    {
+        byte[] encodedInfo = new byte[0];
+        try {
+            encodedInfo = info.getBytes("UTF-8");
+            MqttMessage message = new MqttMessage(encodedInfo);
+            mqttHelper.mqttAndroidClient.publish(topic, message);
+            Log.d (TAG, "publish done");
+        } catch (UnsupportedEncodingException | MqttException e) {
+            e.printStackTrace();
+            Log.e (TAG, e.getMessage());
+        }catch (Exception e) {
+            Log.e (TAG, "general exception "+e.getMessage());
+        }
+
     }
 
     @Override
