@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import com.aseemsethi.mylocation.ui.main.PageViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -21,6 +22,7 @@ import androidx.core.content.ContextCompat;
 //import androidx.viewpager.widget.ViewPager;
 //import androidx.viewpager2.widget.ViewPager2;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import android.util.Log;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     BroadcastReceiver myReceiverMqtt = null;
     BroadcastReceiver myReceiverMqttStatus = null;
     private ActivityMainBinding binding;
+    private PageViewModel pageViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = binding.viewPager;
@@ -115,8 +119,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "registerServices: IdStatus:" +
                         intent.getStringExtra("Id") + " : " +
                         intent.getStringExtra("Status"));
-                //pageViewModel.setStatus( intent.getStringExtra("Id") +
-                //        ":" + intent.getStringExtra("Status"));
+                pageViewModel.setTextOp( intent.getStringExtra("Id") +
+                        ":" + intent.getStringExtra("Status"));
             }
         };
         registerReceiver(myReceiverMqttStatus, filter2);

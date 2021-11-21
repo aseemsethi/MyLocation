@@ -26,9 +26,11 @@ public class MqttHelper {
     final String TAG = "MyLocation MQTTHelper";
     final String serverUri = "tcp://mqtt.eclipseprojects.io:1883";
     final String clientId = UUID.randomUUID().toString();
-    final String subscriptionTopic = "pmoa";
+    final String subscriptionTopic;
 
-    public MqttHelper(Context context){
+    public MqttHelper(Context context, String topic){
+        Log.d(TAG, "MQTT Helper called with topic: " + topic);
+        subscriptionTopic = topic;
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallback() {
             @Override

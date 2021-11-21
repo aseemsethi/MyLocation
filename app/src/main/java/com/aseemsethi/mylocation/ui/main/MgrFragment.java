@@ -1,6 +1,9 @@
 package com.aseemsethi.mylocation.ui.main;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,22 +18,22 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.aseemsethi.mylocation.SingleShotLocationProvider;
-import com.aseemsethi.mylocation.databinding.SettingsFragmentBinding;
+import com.aseemsethi.mylocation.databinding.MgrFragmentBinding;
 import com.aseemsethi.mylocation.myMqttService;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class SettingsFragment extends Fragment {
-    private static final String TAG = "MyLocation SetFrag";
+public class MgrFragment extends Fragment {
+    private static final String TAG = "MyLocation MgrFrag";
     private static final String ARG_SECTION_NUMBER = "section_number";
+    BroadcastReceiver myRecv = null;
 
     private PageViewModel pageViewModel;
-    private SettingsFragmentBinding binding;
+    private MgrFragmentBinding binding;
 
-    public static SettingsFragment newInstance(int index) {
-        SettingsFragment fragment = new SettingsFragment();
+    public static MgrFragment newInstance(int index) {
+        MgrFragment fragment = new MgrFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_SECTION_NUMBER, index);
         fragment.setArguments(bundle);
@@ -42,22 +45,23 @@ public class SettingsFragment extends Fragment {
         Log.d(TAG, "OnCreate");
         super.onCreate(savedInstanceState);
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
-        int index = 2;
+        int index = 3;
         if (getArguments() != null) {
             index = getArguments().getInt(ARG_SECTION_NUMBER);
         }
         pageViewModel.setIndex(index);
+        registerServices();
     }
 
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        binding = SettingsFragmentBinding.inflate(inflater, container, false);
+        binding = MgrFragmentBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        /*
-        final TextView textView = binding.nameansSF;
+        final TextView textView = binding.loc;
+
         pageViewModel.getText().observe(getViewLifecycleOwner(),
             new Observer<String>() {
             @Override
@@ -65,24 +69,46 @@ public class SettingsFragment extends Fragment {
                 textView.setText(s);
             }
         });
-        */
 
-        final Button btn = binding.buttonSF;
+        final Button btn = binding.buttonMgr;
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Save Name: " + binding.nameansSF.getText().toString());
-                pageViewModel.setName(binding.nameansSF.getText().toString());
-                Intent serviceIntent = new Intent(getContext(),
-                        myMqttService.class);
-                serviceIntent.setAction(myMqttService.MQTT_SEND_NAME);
-                serviceIntent.putExtra("name", pageViewModel.getName());
-                getContext().startService(serviceIntent);
+                Log.d(TAG, "onClick");
             }
         });
         return root;
     }
 
+    void registerServices() {
+        Log.d(TAG, "registerServices called filter2");
+        IntentFilter filter2 = new IntentFilter("com.aseemsethi.mylocation.IdStatus");
+        myRecv = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d(TAG, "registerServices: IdStatus:" +
+                        intent.getStringExtra("name") + " : " +
+                        intent.getStringExtra("lat") + " : " +
+                        intent.getStringExtra("long"));
+                pageViewModel.setTextOp( intent.getStringExtra("name")
+                        + ":" + intent.getStringExtra("lat") +
+                        ":" + intent.getStringExtra("long"));
+            }
+        };
+        getContext().getApplicationContext().registerReceiver(myRecv, filter2);
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "OnResume - Register BroadcastReceiver");
+        //registerServices();
+    }
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "OnStart - Register BroadcastReceiver");
+        registerServices();
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();

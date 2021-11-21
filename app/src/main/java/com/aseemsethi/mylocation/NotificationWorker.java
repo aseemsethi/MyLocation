@@ -5,6 +5,7 @@ import static java.lang.Thread.sleep;
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.core.app.NotificationCompat;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStore;
 import androidx.work.ListenableWorker;
 import androidx.work.Worker;
 
@@ -42,7 +43,8 @@ public class NotificationWorker extends ListenableWorker {
     private static final String WORK_RESULT = "MyLocation work";
     private static final String TAG = "MyLocation Worker";
 
-    public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public NotificationWorker(@NonNull Context context,
+                              @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
 

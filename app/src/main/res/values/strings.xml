@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">MyLocation</string>
-    <string name="tab_text_1">Location</string>
+    <string name="tab_text_1">GPS</string>
     <string name="tab_text_2">Settings</string>
+    <string name="tab_text_3">Mgr</string>
 </resources>

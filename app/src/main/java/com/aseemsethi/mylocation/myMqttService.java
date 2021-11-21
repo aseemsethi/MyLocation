@@ -54,7 +54,9 @@ public class myMqttService extends Service {
     MqttHelper mqttHelper;
     final static String MQTTSUBSCRIBE_ACTION = "MQTTSUBSCRIBE_ACTION";
     final static String MQTT_SEND_LOC = "MQTT_SEND_LOC";
+    public final static String MQTT_SEND_NAME = "MQTT_SEND_NAME";
     boolean running = false;
+    String name = null;
 
     public myMqttService() {
     }
@@ -73,13 +75,32 @@ public class myMqttService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = null;
+        String topic = null;
         Log.d(TAG, "onStartCommand mqttService");
         if (intent == null) {
             Log.d(TAG, "Intent is null..possible due to app restart");
             //action = MQTTMSG_ACTION;
-        } else
-            action = intent.getAction();
+        }
+        action = intent.getAction();
         Log.d(TAG, "ACTION: " + action);
+        if (action == "MQTTSUBSCRIBE_ACTION") {
+            Bundle extras = intent.getExtras();
+            if(extras == null) {
+                Log.d(TAG,"null MQTTSUBSCRIBE_ACTION");
+            } else {
+                topic = extras.getString("topic");
+                Log.d(TAG, "MQTTSUBSCRIBE_ACTION topic: " + topic);
+            }
+        }
+        if (action == "MQTT_SEND_NAME") {
+            Bundle extras = intent.getExtras();
+            if(extras == null) {
+                Log.d(TAG,"null MQTT_SEND_NAME");
+            } else {
+                name = extras.getString("name");
+                Log.d(TAG, "MQTT_SEND_NAME name: " + name);
+            }
+        }
         if (action == "MQTT_SEND_LOC") {
             Log.d(TAG, "Recvd MQTT Send LOC message.....................");
             Bundle extras = intent.getExtras();
@@ -89,7 +110,7 @@ public class myMqttService extends Service {
                 Log.d(TAG, "MQTT_SEND_LOC");
                 Float lat = (Float) extras.getFloat("lat");
                 Float lon = (Float) extras.getFloat("lon");
-                publish("pmoa", "hello aseem: " + lat + ":" + lon);
+                publish("pmoa", name + ":" + lat + ":" + lon);
             }
         }
 
@@ -133,7 +154,7 @@ public class myMqttService extends Service {
         }
         Log.d(TAG, "restarting MQTT Service");
         try {
-            startMqtt();
+            startMqtt(topic);
             running = true;
         } catch (MqttException e) {
             e.printStackTrace();
@@ -166,10 +187,9 @@ public class myMqttService extends Service {
         Notification noti;
         Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Log.d(TAG, "Send Notification...");
-        String[] arrOfStr = msg.split(":", 5);
+        String[] arrOfStr = msg.split(":", 4);
         String title = arrOfStr[0].trim();
-        String body = arrOfStr[1].trim() + ":" + arrOfStr[2].trim() +
-                " : " + arrOfStr[3].trim();
+        String body = arrOfStr[1].trim() + ":" + arrOfStr[2].trim();
 
         // Create an explicit intent for an Activity in your app
         Intent intent = new Intent(this, MainActivity.class);
@@ -179,9 +199,7 @@ public class myMqttService extends Service {
         noti = new Notification.Builder(this, CHANNEL_ID)
                 //.setContentTitle(title + " : ")
                 .setContentText(arrOfStr[0].trim() +
-                        "/" + arrOfStr[1].trim() + " :" + arrOfStr[2].trim()
-                        + " :" + arrOfStr[3].trim() +
-                        " :" + arrOfStr[4].trim())
+                        "/" + arrOfStr[1].trim() + " :" + arrOfStr[2].trim())
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentIntent(pendingIntent)
                 //.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
@@ -194,7 +212,7 @@ public class myMqttService extends Service {
             noti = new Notification.Builder(this, CHANNEL_URG)
                     .setContentTitle(title + " : ")
                     .setContentText(arrOfStr[1].trim() +
-                            "/" + arrOfStr[3].trim() + " :" + arrOfStr[4].trim())
+                            "/" + arrOfStr[2].trim())
                     .setSmallIcon(R.drawable.ic_launcher_background)
                     .setContentIntent(pendingIntent)
                     .setSound(ringtoneUri)
@@ -204,9 +222,9 @@ public class myMqttService extends Service {
         }
     }
 
-    private void startMqtt() throws MqttException {
+    private void startMqtt(String topic) throws MqttException {
         Log.d(TAG, "startMqtt");
-        mqttHelper = new MqttHelper(getApplicationContext());
+        mqttHelper = new MqttHelper(getApplicationContext(), topic);
         mqttHelper.mqttAndroidClient.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable throwable) {
@@ -220,14 +238,15 @@ public class myMqttService extends Service {
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
                 String msg = mqttMessage.toString();
                 Log.d(TAG, "MQTT Msg recvd: " + msg);
-                String[] arrOfStr = msg.split(":", 5);
+                String[] arrOfStr = msg.split(":", 4);
                 Log.d(TAG, "MQTT Msg recvd...:" + arrOfStr[0] + " : " + arrOfStr[1] +
-                        " : " + arrOfStr[2] + " : " + arrOfStr[3]);
+                        " : " + arrOfStr[2]);
 
                 Intent intent = new Intent();
                 intent.setAction("com.aseemsethi.mylocation.IdStatus");
-                intent.putExtra("Id", arrOfStr[1].trim());
-                intent.putExtra("Status", arrOfStr[2].trim());
+                intent.putExtra("name", arrOfStr[0].trim());
+                intent.putExtra("lat", arrOfStr[1].trim());
+                intent.putExtra("long", arrOfStr[2].trim());
                 sendBroadcast(intent);
                 Log.d(TAG, "Sent Broadcast.......");
                 //publish("pmoa", "hello aseem: " + arrOfStr[0]);

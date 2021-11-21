@@ -81,11 +81,11 @@ public class PlaceholderFragment extends Fragment {
         binding = FragmentMainBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-
         final TextView textView = binding.textView;
         pageViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
+                Log.d(TAG, "pageViewModel: onChangted");
                 textView.setText(s);
             }
         });
@@ -100,7 +100,8 @@ public class PlaceholderFragment extends Fragment {
         final WorkManager mWorkManager = WorkManager.getInstance();
         //final OneTimeWorkRequest mRequest = new OneTimeWorkRequest.Builder(NotificationWorker.class).build();
         PeriodicWorkRequest periodicSyncDataWork =
-                new PeriodicWorkRequest.Builder(NotificationWorker.class, 15, TimeUnit.MINUTES)
+                new PeriodicWorkRequest.Builder(NotificationWorker.class,
+                        15, TimeUnit.MINUTES)
                         .addTag("TAG_GET_GPS_DATA")
                         .setConstraints(constraints)
                         // setting a backoff on case the work needs to retry
@@ -145,7 +146,8 @@ public class PlaceholderFragment extends Fragment {
                     WorkInfo.State state = workInfo.getState();
                     String v = String.valueOf(latitude) + " : " + String.valueOf(longitude) + "\n";
                     //textView.append(state.toString());
-                    textView.append(v);
+                    // Some bug here TBD - get all 0s here everytime
+                    //pageViewModel.setTextOp(v);
                     Log.d(TAG, "workMgr liveData.." + state.toString());
                     Log.d(TAG, "workMgr liveData.." + latitude + ":" + longitude);
                 }
