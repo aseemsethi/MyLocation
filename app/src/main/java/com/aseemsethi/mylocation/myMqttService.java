@@ -91,6 +91,7 @@ public class myMqttService extends Service {
             } else {
                 topic = extras.getString("topic");
                 role = extras.getString("role");
+                name = extras.getString("name");
                 Log.d(TAG, "MQTTSUBSCRIBE_ACTION topic: " + topic
                 + ", Role: " + role + ".................");
             }
@@ -226,13 +227,12 @@ public class myMqttService extends Service {
     }
 
     private void startMqtt(String topic) throws MqttException {
-        Log.d(TAG, "startMqtt");
+        Log.d(TAG, "startMqtt: role: " + role);
         mqttHelper = new MqttHelper(getApplicationContext(), topic, role);
         mqttHelper.mqttAndroidClient.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable throwable) {
                 Log.d(TAG, "MQTT connection lost !!");
-                //onTaskRemoved(null);
                 mqttHelper.connect();
             }
 

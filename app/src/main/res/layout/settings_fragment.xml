@@ -23,7 +23,7 @@
             android:layout_weight="0.5"
             android:gravity="center"
             android:text="Name:" />
-        <TextView
+        <EditText
             android:id="@+id/nameansSF"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"

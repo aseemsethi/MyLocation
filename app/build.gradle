@@ -8,7 +8,7 @@ android {
     defaultConfig {
         applicationId "com.aseemsethi.mylocation"
         minSdk 29
-        targetSdk 31
+        targetSdk 29
         versionCode 1
         versionName "1.0"
 
@@ -60,4 +60,6 @@ dependencies {
     implementation "com.google.android.gms:play-services-location:15.0.1"
     implementation "com.google.android.gms:play-services-places:15.0.1"
     implementation 'com.google.android.libraries.places:places:2.3.0'
+    implementation 'com.google.android.gms:play-services-auth:19.0.0'
+
 }

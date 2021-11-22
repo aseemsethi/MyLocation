@@ -31,6 +31,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 /**
@@ -114,12 +115,16 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         }
         mGoogleMap.setMyLocationEnabled(true);
         mGoogleMap.getUiSettings().setZoomControlsEnabled(true);
-        mGoogleMap.addMarker(new MarkerOptions().position(new LatLng(43.1, -87.9)));
+        Marker m = mGoogleMap.addMarker(new MarkerOptions()
+                .visible(true).title("nil").position(new LatLng(43.1, -87.9)));
+        m.showInfoWindow();
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(43.1, -87.9), 10));
     }
-    public void updateMap(float lat, float lon) {
+    public void updateMap(String name, float lat, float lon) {
         // Updates the location and zoom of the MapView
-        map.addMarker(new MarkerOptions().position(new LatLng(lat, lon)));
+        Marker m = map.addMarker(new MarkerOptions().
+                visible(true).title(name).position(new LatLng(lat, lon)));
+        m.showInfoWindow();
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng
                 (lat, lon), 10);
         map.animateCamera(cameraUpdate);
@@ -140,7 +145,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                         ":" + intent.getStringExtra("long"));
                 float lat = Float.parseFloat(intent.getStringExtra("lat"));
                 float lon = Float.parseFloat(intent.getStringExtra("long"));
-                updateMap(lat, lon);
+                updateMap(intent.getStringExtra("name"), lat, lon);
             }
         };
         getContext().getApplicationContext().registerReceiver(myRecv, filter2);

@@ -9,9 +9,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 
 import com.aseemsethi.mylocation.ui.main.PageViewModel;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -27,13 +30,15 @@ import com.aseemsethi.mylocation.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MyLocation";
     public static final String MESSAGE_STATUS = "message_status";
-    public static final String ROLE = "MGR";
+    public static final String ROLE = "ENG";
+    //public static final String ROLE = "MGR";
     LocationManager locationManager;
     String provider;
     BroadcastReceiver myReceiverMqtt = null;
     BroadcastReceiver myReceiverMqttStatus = null;
     private ActivityMainBinding binding;
     private PageViewModel pageViewModel;
+    String personName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,23 +53,24 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
-        FloatingActionButton fab = binding.fab;
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "call getLocation() ");
-                getLocation(getApplicationContext(), view);
-                Snackbar.make(view, "Getting coordinates..", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-            }
-        });
+        /*
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        if (acct != null) {
+            personName = acct.getDisplayName();
+            String personGivenName = acct.getGivenName();
+            Log.d(TAG, "Name: " + personName + ":" + personGivenName);
+        } else {
+            Log.d(TAG, "Name is null");
+        }
+         */
+        Log.d(TAG, "Role: " + ROLE);
         Intent serviceIntent = new Intent(getApplicationContext(),
                 myMqttService.class);
         serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
         serviceIntent.putExtra("topic", "pmoa");
         serviceIntent.putExtra("role", ROLE);
+        serviceIntent.putExtra("name", personName);
         startService(serviceIntent);
     }
 
@@ -99,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
                 serviceIntent.putExtra("topic", "pmoa");
                 serviceIntent.putExtra("role", ROLE);
+                serviceIntent.putExtra("name", personName);
                 startService(serviceIntent);
             }
         };

@@ -31,7 +31,7 @@ public class MqttHelper {
 
     public MqttHelper(Context context, String topic, String role1){
         Log.d(TAG, "MQTT Helper called with topic: " + topic + ", Role: "
-        + role);
+        + role1);
         role = role1;
         subscriptionTopic = topic;
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
@@ -71,13 +71,13 @@ public class MqttHelper {
             mqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    Log.d(TAG, "connect succeed");
-                    if (role == "ENG") {
-                        Log.d(TAG, "Role is Engr....");
-                    } else {
+                    Log.d(TAG, "connect succeed with role: " + role);
+                    if (role.equals("MGR")) {
                         Log.d(TAG, "Role is Mgr...");
+                        subscribeToTopic(subscriptionTopic);
+                    } else {
+                        Log.d(TAG, "Role is Engr....");
                     }
-                    subscribeToTopic(subscriptionTopic);
                 }
 
                 @Override
