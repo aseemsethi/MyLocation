@@ -15,21 +15,11 @@ import com.aseemsethi.mylocation.ui.main.PageViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-//import androidx.viewpager.widget.ViewPager;
-//import androidx.viewpager2.widget.ViewPager2;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
-
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.aseemsethi.mylocation.ui.main.SectionsPagerAdapter;
 import com.aseemsethi.mylocation.databinding.ActivityMainBinding;
@@ -37,6 +27,7 @@ import com.aseemsethi.mylocation.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MyLocation";
     public static final String MESSAGE_STATUS = "message_status";
+    public static final String ROLE = "MGR";
     LocationManager locationManager;
     String provider;
     BroadcastReceiver myReceiverMqtt = null;
@@ -73,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 myMqttService.class);
         serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
         serviceIntent.putExtra("topic", "pmoa");
+        serviceIntent.putExtra("role", ROLE);
         startService(serviceIntent);
     }
 
@@ -106,11 +98,12 @@ public class MainActivity extends AppCompatActivity {
                 Intent serviceIntent = new Intent(context, myMqttService.class);
                 serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
                 serviceIntent.putExtra("topic", "pmoa");
+                serviceIntent.putExtra("role", ROLE);
                 startService(serviceIntent);
             }
         };
         registerReceiver(myReceiverMqtt, filter1);
-
+/*
         Log.d(TAG, "registerServices called filter2");
         IntentFilter filter2 = new IntentFilter("com.aseemsethi.mylocation.IdStatus");
         myReceiverMqttStatus = new BroadcastReceiver() {
@@ -124,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         registerReceiver(myReceiverMqttStatus, filter2);
+ */
     }
 
 

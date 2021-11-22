@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +50,7 @@ public class PlaceholderFragment extends Fragment {
     private static final String TAG = "MyLocation PF";
     private static final String ARG_SECTION_NUMBER = "section_number";
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    private AlphaAnimation buttonClick = new AlphaAnimation(1F, 0.1F);
 
     private PageViewModel pageViewModel;
     private FragmentMainBinding binding;
@@ -111,6 +113,7 @@ public class PlaceholderFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //mWorkManager.enqueue(mRequest);
+                v.startAnimation(buttonClick);
                 Log.d(TAG, "Starting periodic task");
                 btnS.setClickable(false);
                 mWorkManager.enqueueUniquePeriodicWork(
@@ -127,6 +130,7 @@ public class PlaceholderFragment extends Fragment {
         btnC.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.startAnimation(buttonClick);
                 Log.d(TAG, "Cancelling periodic task");
                 btnS.setClickable(true);
                 WorkManager.getInstance(getContext()).cancelAllWorkByTag("TAG_GET_GPS_DATA");

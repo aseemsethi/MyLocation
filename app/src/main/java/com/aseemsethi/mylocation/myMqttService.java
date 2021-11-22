@@ -57,6 +57,7 @@ public class myMqttService extends Service {
     public final static String MQTT_SEND_NAME = "MQTT_SEND_NAME";
     boolean running = false;
     String name = null;
+    String role;
 
     public myMqttService() {
     }
@@ -89,7 +90,9 @@ public class myMqttService extends Service {
                 Log.d(TAG,"null MQTTSUBSCRIBE_ACTION");
             } else {
                 topic = extras.getString("topic");
-                Log.d(TAG, "MQTTSUBSCRIBE_ACTION topic: " + topic);
+                role = extras.getString("role");
+                Log.d(TAG, "MQTTSUBSCRIBE_ACTION topic: " + topic
+                + ", Role: " + role + ".................");
             }
         }
         if (action == "MQTT_SEND_NAME") {
@@ -224,7 +227,7 @@ public class myMqttService extends Service {
 
     private void startMqtt(String topic) throws MqttException {
         Log.d(TAG, "startMqtt");
-        mqttHelper = new MqttHelper(getApplicationContext(), topic);
+        mqttHelper = new MqttHelper(getApplicationContext(), topic, role);
         mqttHelper.mqttAndroidClient.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable throwable) {

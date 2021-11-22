@@ -27,9 +27,12 @@ public class MqttHelper {
     final String serverUri = "tcp://mqtt.eclipseprojects.io:1883";
     final String clientId = UUID.randomUUID().toString();
     final String subscriptionTopic;
+    String role;
 
-    public MqttHelper(Context context, String topic){
-        Log.d(TAG, "MQTT Helper called with topic: " + topic);
+    public MqttHelper(Context context, String topic, String role1){
+        Log.d(TAG, "MQTT Helper called with topic: " + topic + ", Role: "
+        + role);
+        role = role1;
         subscriptionTopic = topic;
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallback() {
@@ -69,6 +72,11 @@ public class MqttHelper {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
                     Log.d(TAG, "connect succeed");
+                    if (role == "ENG") {
+                        Log.d(TAG, "Role is Engr....");
+                    } else {
+                        Log.d(TAG, "Role is Mgr...");
+                    }
                     subscribeToTopic(subscriptionTopic);
                 }
 

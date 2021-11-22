@@ -19,7 +19,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
     @StringRes
     private static final int[] TAB_TITLES = new int[]{R.string.tab_text_1, R.string.tab_text_2, R.string.tab_text_3};
-    final String TAG = "MyLocation SecAdap";
+    final String TAG = "MyLocation SecPgAd";
 
     private final Context mContext;
 
@@ -38,10 +38,11 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
             return PlaceholderFragment.newInstance(position + 1);
         } else if (position == 1) {
             Log.d(TAG, "position 1");
-            return SettingsFragment.newInstance(position + 1);
+            return MgrFragment.newInstance(position + 1);
         } else if (position == 2) {
             Log.d(TAG, "position 2");
-            return MgrFragment.newInstance(position + 1);
+            return SettingsFragment.newInstance(position + 1);
+
         }
         return SettingsFragment.newInstance(position + 1);
     }

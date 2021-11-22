@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -25,6 +26,7 @@ import com.aseemsethi.mylocation.myMqttService;
 public class SettingsFragment extends Fragment {
     private static final String TAG = "MyLocation SetFrag";
     private static final String ARG_SECTION_NUMBER = "section_number";
+    private AlphaAnimation buttonClick = new AlphaAnimation(1F, 0.1F);
 
     private PageViewModel pageViewModel;
     private SettingsFragmentBinding binding;
@@ -71,6 +73,7 @@ public class SettingsFragment extends Fragment {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                v.startAnimation(buttonClick);
                 Log.d(TAG, "Save Name: " + binding.nameansSF.getText().toString());
                 pageViewModel.setName(binding.nameansSF.getText().toString());
                 Intent serviceIntent = new Intent(getContext(),
