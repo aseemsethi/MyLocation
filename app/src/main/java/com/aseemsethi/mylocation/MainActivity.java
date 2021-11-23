@@ -40,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private PageViewModel pageViewModel;
     String personName;
+    String topicG = "myLocation";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         Intent serviceIntent = new Intent(getApplicationContext(),
                 myMqttService.class);
         serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
-        serviceIntent.putExtra("topic", "pmoa");
+        serviceIntent.putExtra("topic", topicG);
         serviceIntent.putExtra("role", ROLE);
         serviceIntent.putExtra("name", personName);
         startService(serviceIntent);
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "registerServices: restart mqttService");
                 Intent serviceIntent = new Intent(context, myMqttService.class);
                 serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
-                serviceIntent.putExtra("topic", "pmoa");
+                serviceIntent.putExtra("topic", topicG);
                 serviceIntent.putExtra("role", ROLE);
                 serviceIntent.putExtra("name", personName);
                 startService(serviceIntent);

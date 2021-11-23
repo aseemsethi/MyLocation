@@ -20,6 +20,8 @@ import com.aseemsethi.mylocation.SingleShotLocationProvider;
 import com.aseemsethi.mylocation.databinding.SettingsFragmentBinding;
 import com.aseemsethi.mylocation.myMqttService;
 
+import java.io.File;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -58,16 +60,17 @@ public class SettingsFragment extends Fragment {
         binding = SettingsFragmentBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        /*
-        final TextView textView = binding.nameansSF;
-        pageViewModel.getText().observe(getViewLifecycleOwner(),
-            new Observer<String>() {
+        final Button btnDF = binding.buttonDF;
+        btnDF.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
+            public void onClick(View v) {
+                v.startAnimation(buttonClick);
+                Log.d(TAG, "Delete File: ");
+                //File f = new File("mylocation.txt");
+                //f.delete();
+                getContext().deleteFile("mylocation.txt");
             }
         });
-        */
 
         final Button btn = binding.buttonSF;
         btn.setOnClickListener(new View.OnClickListener() {

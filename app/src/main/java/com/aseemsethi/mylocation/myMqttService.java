@@ -26,6 +26,8 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 
@@ -58,6 +60,8 @@ public class myMqttService extends Service {
     boolean running = false;
     String name = null;
     String role;
+    String lineSeparator;
+    String topic = null;
 
     public myMqttService() {
     }
@@ -76,8 +80,8 @@ public class myMqttService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = null;
-        String topic = null;
         Log.d(TAG, "onStartCommand mqttService");
+        lineSeparator = System.getProperty("line.separator");
         if (intent == null) {
             Log.d(TAG, "Intent is null..possible due to app restart");
             return START_STICKY;
@@ -115,7 +119,7 @@ public class myMqttService extends Service {
                 Log.d(TAG, "MQTT_SEND_LOC");
                 Float lat = (Float) extras.getFloat("lat");
                 Float lon = (Float) extras.getFloat("lon");
-                publish("pmoa", name + ":" + lat + ":" + lon);
+                publish(topic, name + ":" + lat + ":" + lon);
             }
         }
 
@@ -253,7 +257,17 @@ public class myMqttService extends Service {
                 intent.putExtra("long", arrOfStr[2].trim());
                 sendBroadcast(intent);
                 Log.d(TAG, "Sent Broadcast.......");
-                //publish("pmoa", "hello aseem: " + arrOfStr[0]);
+                // The app might be down. Save this in a file which will be read by
+                // the app when it comes up
+                String saveLine = arrOfStr[0].trim() + ":" + arrOfStr[1].trim()
+                        + ":" + arrOfStr[2].trim();
+                if (arrOfStr[0].equals("null")) {
+                    Log.d(TAG, "Name is null..not saving");
+                } else {
+                    Log.d(TAG, "Saving to file: " + saveLine);
+                    writeToFile(saveLine, getApplicationContext());
+                    writeToFile(lineSeparator, getApplicationContext());
+                }
 
                 sendNotification(msg);
                 if ((arrOfStr[1].trim()).equals("4ffe1a")) {
@@ -276,6 +290,19 @@ public class myMqttService extends Service {
         });
     }
 
+    private void writeToFile(String data, Context context) {
+        try {
+            try (OutputStreamWriter outputStreamWriter =
+                         new OutputStreamWriter(context.openFileOutput
+                                 ("mylocation.txt", Context.MODE_APPEND))) {
+                outputStreamWriter.write(data);
+                outputStreamWriter.close();
+            }
+        } catch (IOException e) {
+            Log.e("Exception", "File write failed: " + e.toString());
+        }
+    }
+
     public void publish(String topic, String info)
     {
         byte[] encodedInfo = new byte[0];
@@ -283,14 +310,14 @@ public class myMqttService extends Service {
             encodedInfo = info.getBytes("UTF-8");
             MqttMessage message = new MqttMessage(encodedInfo);
             mqttHelper.mqttAndroidClient.publish(topic, message);
-            Log.d (TAG, "publish done");
+            Log.d (TAG, "publish done from: " + role);
         } catch (UnsupportedEncodingException | MqttException e) {
             e.printStackTrace();
             Log.e (TAG, e.getMessage());
         }catch (Exception e) {
             Log.e (TAG, "general exception "+e.getMessage());
         }
-
+        Log.d(TAG, "publish exit");
     }
 
     @Override

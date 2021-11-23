@@ -34,6 +34,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 /**
  * A placeholder fragment containing a simple view.
  */
@@ -99,6 +106,49 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         return root;
     }
 
+    private String readFromFile(Context context) {
+        String ret = "";
+        Log.d(TAG, "Read from file....");
+        File file = context.getFileStreamPath("mylocation.txt");
+        if(file == null || !file.exists()) {
+            Log.d(TAG, "File now found !!!");
+            return "true";
+        }
+        try {
+            InputStream inputStream = context.openFileInput("mylocation.txt");
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                    Log.d(TAG, "Read: " + receiveString);
+                    String[] arrOfStr = receiveString.split(":", 4);
+                    if (arrOfStr.length < 3) {
+                        Log.d(TAG, "Length = " + arrOfStr.length);
+                        continue;
+                    }
+                    Log.d(TAG, "Parsed..." + arrOfStr[0] + " : " + arrOfStr[1] +
+                            " : " + arrOfStr[2]);
+                    float lat = Float.parseFloat(arrOfStr[1]);
+                    float lon = Float.parseFloat(arrOfStr[2]);
+                    updateMap(arrOfStr[0], lat, lon);
+                }
+                inputStream.close();
+                //ret = stringBuilder.toString();
+                return "true";
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e("login activity", "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e("login activity", "Can not read file: " + e.toString());
+        }
+
+        return ret;
+    }
+
     @Override
     public void onMapReady(GoogleMap mGoogleMap) {
         Log.d(TAG, "onMapReady called.....");
@@ -119,6 +169,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 .visible(true).title("nil").position(new LatLng(43.1, -87.9)));
         m.showInfoWindow();
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(43.1, -87.9), 10));
+        readFromFile(getContext());
     }
     public void updateMap(String name, float lat, float lon) {
         // Updates the location and zoom of the MapView
