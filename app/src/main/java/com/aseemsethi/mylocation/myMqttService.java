@@ -80,6 +80,7 @@ public class myMqttService extends Service {
         Log.d(TAG, "onStartCommand mqttService");
         if (intent == null) {
             Log.d(TAG, "Intent is null..possible due to app restart");
+            return START_STICKY;
             //action = MQTTMSG_ACTION;
         }
         action = intent.getAction();

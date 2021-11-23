@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,8 +31,8 @@ import com.aseemsethi.mylocation.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MyLocation";
     public static final String MESSAGE_STATUS = "message_status";
-    public static final String ROLE = "ENG";
-    //public static final String ROLE = "MGR";
+    //public static final String ROLE = "ENG";
+    public static final String ROLE = "MGR";
     LocationManager locationManager;
     String provider;
     BroadcastReceiver myReceiverMqtt = null;
@@ -53,7 +54,11 @@ public class MainActivity extends AppCompatActivity {
         viewPager.setAdapter(sectionsPagerAdapter);
         TabLayout tabs = binding.tabs;
         tabs.setupWithViewPager(viewPager);
-
+        if (ROLE.equals("MGR")) {
+            tabs.setSelectedTabIndicatorColor(Color.parseColor("#FF0000"));
+            tabs.setSelectedTabIndicatorHeight((int) (5 * getResources().getDisplayMetrics().density));
+            //tabs.setTabTextColors(Color.parseColor("#727272"), Color.parseColor("#ffffff"));
+        }
         /*
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
         if (acct != null) {
