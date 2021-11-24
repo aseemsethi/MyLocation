@@ -1,5 +1,7 @@
 package com.aseemsethi.mylocation.ui.main;
 
+import static com.aseemsethi.mylocation.MainActivity.ROLE;
+
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -91,7 +93,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         role = pageViewModel.roleSet;
         if (role == null) {
             Log.d(TAG, "OnCreateView: Role is null !!!!!!!!!!!!!!!!!!!!!!!11");
-            role = "MGR";
+            role = ROLE;
         }
         if (role.equals("MGR")) {
             mapView = (MapView) binding.mapview;
@@ -236,7 +238,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         role = pageViewModel.getRole();
         if (role == null) {
             Log.d(TAG, "OnResume Role is null !!!!!!!!!!!!!!!!!!!!!!!11");
-            role = "MGR";
+            role = ROLE;
         }
         if (role.equals("MGR"))
             mapView.onResume();
@@ -245,7 +247,11 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause: Unregister recv");
-        getContext().unregisterReceiver(myRecv);
+        try {
+            getContext().unregisterReceiver(myRecv);
+        } catch (Exception e){
+            Log.d(TAG, "onPause: Already Unregistered recv");
+        }
     }
 
     @Override
@@ -255,7 +261,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         role = pageViewModel.getRole();
         if (role == null) {
             Log.d(TAG, "OnStart Role is null !!!!!!!!!!!!!!!!!!!!!!!11");
-            role = "MGR";
+            role = ROLE;
         }
         registerServices();
     }
