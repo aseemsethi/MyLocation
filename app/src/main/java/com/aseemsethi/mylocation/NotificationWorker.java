@@ -127,17 +127,21 @@ public class NotificationWorker extends ListenableWorker {
 
     private void showNotification(String task, String desc) {
         Log.d(TAG, "show notif");
-        NotificationManager manager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager manager = (NotificationManager) getApplicationContext().
+                getSystemService(Context.NOTIFICATION_SERVICE);
         String channelId = "task_channel";
         String channelName = "task_name";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Log.d(TAG, "SDK_INT > Build");
             NotificationChannel channel = new
-                    NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+                    NotificationChannel(channelId, channelName,
+                    NotificationManager.IMPORTANCE_LOW); // meaqns no sound
             manager.createNotificationChannel(channel);
         }
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), channelId)
+        NotificationCompat.Builder builder =
+                new NotificationCompat.Builder(getApplicationContext(), channelId)
                 .setContentTitle(task)
-                .setContentText(desc)
+                .setContentText(desc).setSound(null)
                 .setSmallIcon(R.mipmap.ic_launcher);
         manager.notify(1, builder.build());
     }

@@ -111,7 +111,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         Log.d(TAG, "Read from file....");
         File file = context.getFileStreamPath("mylocation.txt");
         if(file == null || !file.exists()) {
-            Log.d(TAG, "File now found !!!");
+            Log.d(TAG, "File not found !!!");
             return "true";
         }
         try {

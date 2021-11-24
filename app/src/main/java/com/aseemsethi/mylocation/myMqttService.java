@@ -29,7 +29,10 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import kotlin.random.URandomKt;
 
@@ -48,7 +51,7 @@ reducing resource usage.
 public class myMqttService extends Service {
     final String TAG = "MyLocation: MQTT";
     String CHANNEL_ID = "default";
-    String CHANNEL_URG = "urgent";
+    //String CHANNEL_URG = "urgent";
     NotificationManager mNotificationManager;
     Notification notification;
     int incr = 100;
@@ -132,7 +135,7 @@ public class myMqttService extends Service {
         mChannel.setSound(null, null);
         //mChannel.setVibrationPattern(new long[] { 0, 400, 200, 400});
         mNotificationManager.createNotificationChannel(mChannel);
-
+/*
         NotificationChannel uChannel = new NotificationChannel(CHANNEL_URG,
                 "urg_channel",
                 NotificationManager.IMPORTANCE_LOW);
@@ -151,7 +154,7 @@ public class myMqttService extends Service {
         uChannel.setSound(ringtoneUri, audioAttributes);
         uChannel.setVibrationPattern(new long[]{0, 400, 200, 400});
         mNotificationManager.createNotificationChannel(uChannel);
-
+*/
         if (running == true) {
             Log.d(TAG, "MQTT Service is already running");
             //mqttHelper.subscribeToTopic("aseemsethi");
@@ -204,18 +207,21 @@ public class myMqttService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
+        String currentTime = new SimpleDateFormat("HH:mm",
+                Locale.getDefault()).format(new Date());
+        Log.d(TAG, "Current Time: " + currentTime);
         noti = new Notification.Builder(this, CHANNEL_ID)
                 //.setContentTitle(title + " : ")
-                .setContentText(arrOfStr[0].trim() +
-                        "/" + arrOfStr[1].trim() + " :" + arrOfStr[2].trim())
+                .setContentText(arrOfStr[0].trim() + "/" + "Recv GPS at: " +
+                        //"/" + arrOfStr[1].trim() + " :" + arrOfStr[2].trim() +
+                        currentTime)
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentIntent(pendingIntent)
                 //.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
                 //.setSound(defaultSoundUri)
                 .build();
         mNotificationManager.notify(incr++, noti);
-
+/*
         if (Double.parseDouble(arrOfStr[1].trim()) > 30.0) {
             Log.d(TAG, "Alarm !!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             noti = new Notification.Builder(this, CHANNEL_URG)
@@ -229,6 +235,7 @@ public class myMqttService extends Service {
                     .build();
             mNotificationManager.notify(incr++, noti);
         }
+ */
     }
 
     private void startMqtt(String topic) throws MqttException {
