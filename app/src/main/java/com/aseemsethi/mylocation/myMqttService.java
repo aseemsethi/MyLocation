@@ -188,7 +188,7 @@ public class myMqttService extends Service {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        String currentTime = new SimpleDateFormat("HH:mm",
+        String currentTime = new SimpleDateFormat("HH-mm",
                 Locale.getDefault()).format(new Date());
         Log.d(TAG, "Current Time: " + currentTime);
         noti = new Notification.Builder(this, CHANNEL_ID)
@@ -228,7 +228,7 @@ public class myMqttService extends Service {
                 intent.putExtra("name", arrOfStr[0].trim());
                 intent.putExtra("lat", arrOfStr[1].trim());
                 intent.putExtra("long", arrOfStr[2].trim());
-                String currentTime = new SimpleDateFormat("HH:mm",
+                String currentTime = new SimpleDateFormat("HH-mm",
                         Locale.getDefault()).format(new Date());
                 intent.putExtra("time", currentTime.toString());
                 sendBroadcast(intent);
