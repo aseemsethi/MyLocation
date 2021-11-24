@@ -140,7 +140,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                         continue;
                     }
                     Log.d(TAG, "Parsed..." + arrOfStr[0] + " : " + arrOfStr[1] +
-                            " : " + arrOfStr[2]);
+                            " : " + arrOfStr[2] + ":" + arrOfStr[3]);
                     float lat = Float.parseFloat(arrOfStr[1]);
                     float lon = Float.parseFloat(arrOfStr[2]);
                     String currentTime = arrOfStr[3];
@@ -239,7 +239,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         }
         if (role.equals("MGR"))
             mapView.onResume();
-        //registerServices();
+        registerServices();
     }
     public void onPause() {
         super.onPause();
