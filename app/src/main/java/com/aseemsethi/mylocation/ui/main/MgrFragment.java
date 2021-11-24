@@ -87,10 +87,10 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         binding = MgrFragmentBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
         final TextView textView = binding.loc;
-        role = pageViewModel.getRole();
-        Log.d(TAG, "Role in MgrFragemnt: " + role);
+        //role = pageViewModel.getRole();
+        role = pageViewModel.roleSet;
         if (role == null) {
-            Log.d(TAG, "Role is null !!!!!!!!!!!!!!!!!!!!!!!11");
+            Log.d(TAG, "OnCreateView: Role is null !!!!!!!!!!!!!!!!!!!!!!!11");
             role = "MGR";
         }
         if (role.equals("MGR")) {
@@ -134,7 +134,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 while ( (receiveString = bufferedReader.readLine()) != null ) {
                     stringBuilder.append("\n").append(receiveString);
                     Log.d(TAG, "Read: " + receiveString);
-                    String[] arrOfStr = receiveString.split(":", 4);
+                    String[] arrOfStr = receiveString.split(":", 5);
                     if (arrOfStr.length < 3) {
                         Log.d(TAG, "Length = " + arrOfStr.length);
                         continue;
@@ -143,7 +143,8 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                             " : " + arrOfStr[2]);
                     float lat = Float.parseFloat(arrOfStr[1]);
                     float lon = Float.parseFloat(arrOfStr[2]);
-                    updateMap(arrOfStr[0], lat, lon);
+                    String currentTime = arrOfStr[3];
+                    updateMap(arrOfStr[0], lat, lon, currentTime);
                 }
                 inputStream.close();
                 //ret = stringBuilder.toString();
@@ -181,13 +182,16 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(43.1, -87.9), 10));
         readFromFile(getContext());
     }
-    public void updateMap(String name, float lat, float lon) {
+    public void updateMap(String name, float lat, float lon, String currentTime) {
         // Updates the location and zoom of the MapView
         IconGenerator iconFactory = new IconGenerator(getContext());
         Marker m = map.addMarker(new MarkerOptions().
-                visible(true).title(name).position(new LatLng(lat, lon)));
-        m.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(name)));
-        //m.showInfoWindow();
+                visible(true).
+                title(name + ":" + currentTime).
+                position(new LatLng(lat, lon)));
+        m.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(name +
+                ":" + currentTime)));
+        m.showInfoWindow();
 
         /*
         Marker mMarkerA = map.addMarker(new MarkerOptions().position(new LatLng(12, 34)));
@@ -209,13 +213,16 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 Log.d(TAG, "registerServices: IdStatus:" +
                         intent.getStringExtra("name") + " : " +
                         intent.getStringExtra("lat") + " : " +
-                        intent.getStringExtra("long"));
+                        intent.getStringExtra("long") + ":" +
+                        intent.getStringExtra("time"));
                 pageViewModel.setTextOp( intent.getStringExtra("name")
                         + ":" + intent.getStringExtra("lat") +
-                        ":" + intent.getStringExtra("long"));
+                        ":" + intent.getStringExtra("long") +
+                        ":" + intent.getStringExtra("time"));
                 float lat = Float.parseFloat(intent.getStringExtra("lat"));
                 float lon = Float.parseFloat(intent.getStringExtra("long"));
-                updateMap(intent.getStringExtra("name"), lat, lon);
+                String currentTime = intent.getStringExtra("time");
+                updateMap(intent.getStringExtra("name"), lat, lon, currentTime);
             }
         };
         getContext().getApplicationContext().registerReceiver(myRecv, filter2);
@@ -223,22 +230,36 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onResume() {
+        super.onResume();
+        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+        role = pageViewModel.getRole();
+        if (role == null) {
+            Log.d(TAG, "OnResume Role is null !!!!!!!!!!!!!!!!!!!!!!!11");
+            role = "MGR";
+        }
         if (role.equals("MGR"))
             mapView.onResume();
-        super.onResume();
-        Log.d(TAG, "OnResume - Register BroadcastReceiver");
         //registerServices();
     }
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause: Unregister recv");
+        getContext().unregisterReceiver(myRecv);
+    }
+
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "OnStart - Register BroadcastReceiver");
+        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+        role = pageViewModel.getRole();
+        if (role == null) {
+            Log.d(TAG, "OnStart Role is null !!!!!!!!!!!!!!!!!!!!!!!11");
+            role = "MGR";
+        }
         registerServices();
     }
     @Override
     public void onDestroyView() {
-        if (role.equals("MGR"))
-            mapView.onResume();
         super.onDestroyView();
         binding = null;
     }

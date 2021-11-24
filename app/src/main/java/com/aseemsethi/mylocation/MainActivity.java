@@ -48,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate");
 
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
-        pageViewModel.setRole(ROLE);
+        //pageViewModel.setRole(ROLE);
+        pageViewModel.roleSet = ROLE;
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -62,16 +63,6 @@ public class MainActivity extends AppCompatActivity {
             tabs.setSelectedTabIndicatorHeight((int) (5 * getResources().getDisplayMetrics().density));
             //tabs.setTabTextColors(Color.parseColor("#727272"), Color.parseColor("#ffffff"));
         }
-        /*
-        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
-        if (acct != null) {
-            personName = acct.getDisplayName();
-            String personGivenName = acct.getGivenName();
-            Log.d(TAG, "Name: " + personName + ":" + personGivenName);
-        } else {
-            Log.d(TAG, "Name is null");
-        }
-         */
         Log.d(TAG, "Role: " + ROLE);
         Intent serviceIntent = new Intent(getApplicationContext(),
                 myMqttService.class);
@@ -118,21 +109,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         registerReceiver(myReceiverMqtt, filter1);
-/*
-        Log.d(TAG, "registerServices called filter2");
-        IntentFilter filter2 = new IntentFilter("com.aseemsethi.mylocation.IdStatus");
-        myReceiverMqttStatus = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d(TAG, "registerServices: IdStatus:" +
-                        intent.getStringExtra("Id") + " : " +
-                        intent.getStringExtra("Status"));
-                pageViewModel.setTextOp( intent.getStringExtra("Id") +
-                        ":" + intent.getStringExtra("Status"));
-            }
-        };
-        registerReceiver(myReceiverMqttStatus, filter2);
- */
     }
 
 

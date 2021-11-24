@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModel;
 
 public class PageViewModel extends ViewModel {
     final String TAG = "MyLocation PV";
-    String name, roleSet;
+    public String name, roleSet;
 
     public void setName(String nameTxt) {
         name = nameTxt;

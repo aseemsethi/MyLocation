@@ -135,26 +135,7 @@ public class myMqttService extends Service {
         mChannel.setSound(null, null);
         //mChannel.setVibrationPattern(new long[] { 0, 400, 200, 400});
         mNotificationManager.createNotificationChannel(mChannel);
-/*
-        NotificationChannel uChannel = new NotificationChannel(CHANNEL_URG,
-                "urg_channel",
-                NotificationManager.IMPORTANCE_LOW);
-        Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        uChannel.enableLights(true);
-        uChannel.setLightColor(Color.RED);
-        uChannel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
-        AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .build();
-        AudioAttributes att = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build();
-        uChannel.setSound(ringtoneUri, audioAttributes);
-        uChannel.setVibrationPattern(new long[]{0, 400, 200, 400});
-        mNotificationManager.createNotificationChannel(uChannel);
-*/
+
         if (running == true) {
             Log.d(TAG, "MQTT Service is already running");
             //mqttHelper.subscribeToTopic("aseemsethi");
@@ -180,9 +161,9 @@ public class myMqttService extends Service {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        Notification noti = new Notification.Builder(this, "default")
-                .setContentTitle("MQTT:")
-                .setContentText("Starting: " + Calendar.getInstance().getTime())
+        Notification noti = new Notification.Builder(this, CHANNEL_ID)
+                //.setContentTitle("MQTT:")
+                .setContentText("Start Svc: " + Calendar.getInstance().getTime())
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentIntent(pendingIntent)
                 .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
@@ -221,21 +202,6 @@ public class myMqttService extends Service {
                 //.setSound(defaultSoundUri)
                 .build();
         mNotificationManager.notify(incr++, noti);
-/*
-        if (Double.parseDouble(arrOfStr[1].trim()) > 30.0) {
-            Log.d(TAG, "Alarm !!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            noti = new Notification.Builder(this, CHANNEL_URG)
-                    .setContentTitle(title + " : ")
-                    .setContentText(arrOfStr[1].trim() +
-                            "/" + arrOfStr[2].trim())
-                    .setSmallIcon(R.drawable.ic_launcher_background)
-                    .setContentIntent(pendingIntent)
-                    .setSound(ringtoneUri)
-                    .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
-                    .build();
-            mNotificationManager.notify(incr++, noti);
-        }
- */
     }
 
     private void startMqtt(String topic) throws MqttException {
@@ -262,12 +228,15 @@ public class myMqttService extends Service {
                 intent.putExtra("name", arrOfStr[0].trim());
                 intent.putExtra("lat", arrOfStr[1].trim());
                 intent.putExtra("long", arrOfStr[2].trim());
+                String currentTime = new SimpleDateFormat("HH:mm",
+                        Locale.getDefault()).format(new Date());
+                intent.putExtra("time", currentTime.toString());
                 sendBroadcast(intent);
                 Log.d(TAG, "Sent Broadcast.......");
                 // The app might be down. Save this in a file which will be read by
                 // the app when it comes up
                 String saveLine = arrOfStr[0].trim() + ":" + arrOfStr[1].trim()
-                        + ":" + arrOfStr[2].trim();
+                        + ":" + arrOfStr[2].trim() + ":" + currentTime;
                 if (arrOfStr[0].equals("null")) {
                     Log.d(TAG, "Name is null..not saving");
                 } else {
@@ -275,19 +244,7 @@ public class myMqttService extends Service {
                     writeToFile(saveLine, getApplicationContext());
                     writeToFile(lineSeparator, getApplicationContext());
                 }
-
                 sendNotification(msg);
-                if ((arrOfStr[1].trim()).equals("4ffe1a")) {
-                    //Log.d(TAG, "MQTT Msg recvd from: 4ffe1a");
-                    //TextView v1 = (TextView) root.findViewById(R.id.sensorValue1);
-                    //v1.setText(arrOfStr[2]);
-                    //sendNotification(msg);
-                } else if ((arrOfStr[1].trim()).equals("f6e01a")) {
-                    //Log.d(TAG, "MQTT Msg recvd from: f6e01a");
-                    //TextView v1 = (TextView) root.findViewById(R.id.sensorValue2);
-                    //v1.setText(arrOfStr[2]);
-                    //sendNotification(msg);
-                }
             }
 
             @Override
