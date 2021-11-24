@@ -30,9 +30,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.ui.IconGenerator;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -47,9 +49,11 @@ import java.io.InputStreamReader;
 public class MgrFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = "MyLocation MgrFrag";
     private static final String ARG_SECTION_NUMBER = "section_number";
+    private static final String ROLE_SET = "role_set";
     BroadcastReceiver myRecv = null;
     MapView mapView;
     GoogleMap map;
+    String role;
 
     private PageViewModel pageViewModel;
     private MgrFragmentBinding binding;
@@ -67,6 +71,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         Log.d(TAG, "OnCreate");
         super.onCreate(savedInstanceState);
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+
         int index = 3;
         if (getArguments() != null) {
             index = getArguments().getInt(ARG_SECTION_NUMBER);
@@ -82,27 +87,32 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         binding = MgrFragmentBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
         final TextView textView = binding.loc;
-
-        mapView = (MapView) binding.mapview;
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this);
-        MapsInitializer.initialize(this.getActivity());
-
-        pageViewModel.getText().observe(getViewLifecycleOwner(),
-                new Observer<String>() {
-                    @Override
-                    public void onChanged(@Nullable String s) {
-                        textView.setText(s);
-                    }
-                });
-
-        final Button btn = binding.buttonMgr;
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onClick");
-            }
-        });
+        role = pageViewModel.getRole();
+        Log.d(TAG, "Role in MgrFragemnt: " + role);
+        if (role == null) {
+            Log.d(TAG, "Role is null !!!!!!!!!!!!!!!!!!!!!!!11");
+            role = "MGR";
+        }
+        if (role.equals("MGR")) {
+            mapView = (MapView) binding.mapview;
+            mapView.onCreate(savedInstanceState);
+            mapView.getMapAsync(this);
+            MapsInitializer.initialize(this.getActivity());
+            pageViewModel.getText().observe(getViewLifecycleOwner(),
+                    new Observer<String>() {
+                        @Override
+                        public void onChanged(@Nullable String s) {
+                            textView.setText(s);
+                        }
+                    });
+            final Button btn = binding.buttonMgr;
+            btn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG, "onClick");
+                }
+            });
+        }
         return root;
     }
 
@@ -173,9 +183,18 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
     }
     public void updateMap(String name, float lat, float lon) {
         // Updates the location and zoom of the MapView
+        IconGenerator iconFactory = new IconGenerator(getContext());
         Marker m = map.addMarker(new MarkerOptions().
                 visible(true).title(name).position(new LatLng(lat, lon)));
-        m.showInfoWindow();
+        m.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(name)));
+        //m.showInfoWindow();
+
+        /*
+        Marker mMarkerA = map.addMarker(new MarkerOptions().position(new LatLng(12, 34)));
+        mMarkerA.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon("Marker A")));
+        Marker mMarkerB = map.addMarker(new MarkerOptions().position(new LatLng(13, 35)));
+        mMarkerB.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon("Marker B")));
+        */
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng
                 (lat, lon), 10);
         map.animateCamera(cameraUpdate);
@@ -204,7 +223,8 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onResume() {
-        mapView.onResume();
+        if (role.equals("MGR"))
+            mapView.onResume();
         super.onResume();
         Log.d(TAG, "OnResume - Register BroadcastReceiver");
         //registerServices();
@@ -217,7 +237,8 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
     }
     @Override
     public void onDestroyView() {
-        mapView.onResume();
+        if (role.equals("MGR"))
+            mapView.onResume();
         super.onDestroyView();
         binding = null;
     }

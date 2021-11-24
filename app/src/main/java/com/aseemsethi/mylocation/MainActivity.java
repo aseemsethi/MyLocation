@@ -45,10 +45,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG, "onCreate");
 
+        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+        pageViewModel.setRole(ROLE);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
         ViewPager viewPager = binding.viewPager;
@@ -147,12 +149,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+        pageViewModel.setRole(ROLE);
         Log.d(TAG, "OnResume - Register BroadcastReceiver");
         //registerServices();
     }
     @Override
     protected void onStart() {
         super.onStart();
+        pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
+        pageViewModel.setRole(ROLE);
         Log.d(TAG, "OnStart - Register BroadcastReceiver");
         registerServices();
     }

@@ -43,7 +43,6 @@ public class SettingsFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "OnCreate");
         super.onCreate(savedInstanceState);
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
         int index = 2;
@@ -65,9 +64,6 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 v.startAnimation(buttonClick);
-                Log.d(TAG, "Delete File: ");
-                //File f = new File("mylocation.txt");
-                //f.delete();
                 getContext().deleteFile("mylocation.txt");
             }
         });

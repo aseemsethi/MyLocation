@@ -8,6 +8,8 @@ import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelStore;
 
 import com.aseemsethi.mylocation.R;
 
@@ -37,7 +39,7 @@ public class SectionsPagerAdapter extends FragmentPagerAdapter {
             Log.d(TAG, "position 0");
             return PlaceholderFragment.newInstance(position + 1);
         } else if (position == 1) {
-            Log.d(TAG, "position 1");
+            Log.d(TAG, "position 1: ");
             return MgrFragment.newInstance(position + 1);
         } else if (position == 2) {
             Log.d(TAG, "position 2");
