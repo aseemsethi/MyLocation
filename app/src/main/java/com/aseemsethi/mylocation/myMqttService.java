@@ -282,7 +282,7 @@ public class myMqttService extends Service {
     public void onTaskRemoved(Intent rootIntent) {
         Log.d(TAG, "Mqtt Service task removed");
         super.onTaskRemoved(rootIntent);
-        running = false;
+        //running = false; - else we get multiple MSG RECVD for same message
         sendBroadcast(new Intent("RestartMqtt"));
 /*
         Context context = getApplicationContext();

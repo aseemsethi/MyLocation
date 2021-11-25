@@ -277,6 +277,13 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        Log.d(TAG, "onDestroy: Unregister recv");
+        try {
+            getContext().unregisterReceiver(myRecv);
+            MgrBroacastRegistred = false;
+        } catch (Exception e){
+            Log.d(TAG, "onPause: Already Unregistered recv");
+        }
         binding = null;
     }
 }
