@@ -52,6 +52,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
     private static final String TAG = "MyLocation MgrFrag";
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final String ROLE_SET = "role_set";
+    private boolean MgrBroacastRegistred = false;
     BroadcastReceiver myRecv = null;
     MapView mapView;
     GoogleMap map;
@@ -209,6 +210,12 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
 
     void registerServices() {
         Log.d(TAG, "registerServices called filter2");
+        if (MgrBroacastRegistred == false) {
+            MgrBroacastRegistred = true;
+        } else {
+            Log.d(TAG, "Recevier already registered");
+            return;
+        }
         IntentFilter filter2 = new IntentFilter("com.aseemsethi.mylocation.IdStatus");
         myRecv = new BroadcastReceiver() {
             @Override
@@ -249,6 +256,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         Log.d(TAG, "onPause: Unregister recv");
         try {
             getContext().unregisterReceiver(myRecv);
+            MgrBroacastRegistred = false;
         } catch (Exception e){
             Log.d(TAG, "onPause: Already Unregistered recv");
         }

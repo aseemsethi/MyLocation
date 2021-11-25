@@ -190,7 +190,6 @@ public class myMqttService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
         String currentTime = new SimpleDateFormat("HH-mm",
                 Locale.getDefault()).format(new Date());
-        Log.d(TAG, "Current Time: " + currentTime);
         noti = new Notification.Builder(this, CHANNEL_ID)
                 //.setContentTitle(title + " : ")
                 .setContentText(arrOfStr[0].trim() + "/" + "Recv GPS at: " +
@@ -281,7 +280,6 @@ public class myMqttService extends Service {
         }catch (Exception e) {
             Log.e (TAG, "general exception "+e.getMessage());
         }
-        Log.d(TAG, "publish exit");
     }
 
     @Override
