@@ -57,6 +57,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
     MapView mapView;
     GoogleMap map;
     String role;
+    IconGenerator iconFactory;
 
     private PageViewModel pageViewModel;
     private MgrFragmentBinding binding;
@@ -167,6 +168,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap mGoogleMap) {
         Log.d(TAG, "onMapReady called.....");
+        iconFactory = new IconGenerator(getContext());
         map = mGoogleMap;
         mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
         if (ActivityCompat.checkSelfPermission(getContext(),
@@ -188,7 +190,6 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
     }
     public void updateMap(String name, float lat, float lon, String currentTime) {
         // Updates the location and zoom of the MapView
-        IconGenerator iconFactory = new IconGenerator(getContext());
         Marker m = map.addMarker(new MarkerOptions().
                 visible(true).
                 title(name + ":" + currentTime).

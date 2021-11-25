@@ -153,7 +153,6 @@ public class myMqttService extends Service {
             e.printStackTrace();
         }
 
-
         // The following "startForeground" with a notification is what makes
         // the service run in the background and not get killed, when the app gets
         // killed by the user.
@@ -230,18 +229,15 @@ public class myMqttService extends Service {
                 String currentTime = new SimpleDateFormat("HH-mm",
                         Locale.getDefault()).format(new Date());
                 intent.putExtra("time", currentTime.toString());
-                sendBroadcast(intent);
-                Log.d(TAG, "Sent Broadcast.......");
-                // The app might be down. Save this in a file which will be read by
-                // the app when it comes up
                 String saveLine = arrOfStr[0].trim() + ":" + arrOfStr[1].trim()
                         + ":" + arrOfStr[2].trim() + ":" + currentTime;
                 if (arrOfStr[0].equals("null")) {
-                    Log.d(TAG, "Name is null..not saving");
+                    Log.d(TAG, "Name is null..not saving or broadcasting");
                 } else {
-                    Log.d(TAG, "Saving to file: " + saveLine);
+                    Log.d(TAG, "Bscat/Saving to file: " + saveLine);
                     writeToFile(saveLine, getApplicationContext());
                     writeToFile(lineSeparator, getApplicationContext());
+                    sendBroadcast(intent);
                 }
                 sendNotification(msg);
             }
@@ -306,6 +302,7 @@ public class myMqttService extends Service {
     public void onDestroy() {
         Log.d(TAG, "Mqtt Service task destroyed");
         running = false;
+        mqttHelper.unsubscribeToTopic(topic);
         sendBroadcast(new Intent("RestartMqtt"));
         // The service is no longer used and is being destroyed
     }
