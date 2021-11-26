@@ -26,7 +26,12 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
@@ -65,6 +70,7 @@ public class myMqttService extends Service {
     String role;
     String lineSeparator;
     String topic = null;
+    String filename = "mylocation.txt";
 
     public myMqttService() {
     }
@@ -87,8 +93,9 @@ public class myMqttService extends Service {
         lineSeparator = System.getProperty("line.separator");
         if (intent == null) {
             Log.d(TAG, "Intent is null..possible due to app restart");
-            return START_STICKY;
+            //return START_STICKY;
             //action = MQTTMSG_ACTION;
+            //return android.app.Service.START_REDELIVER_INTENT;
         }
         action = intent.getAction();
         Log.d(TAG, "ACTION: " + action);
@@ -100,8 +107,11 @@ public class myMqttService extends Service {
                 topic = extras.getString("topic");
                 role = extras.getString("role");
                 name = extras.getString("name");
-                Log.d(TAG, "MQTTSUBSCRIBE_ACTION topic: " + topic
-                + ", Role: " + role + ".................");
+                this.deleteFile("svcdata.txt");
+                writeToFile(topic + ":" + role + ":" + name,
+                        getApplicationContext(), "svcdata.txt");
+                Log.d(TAG, "MQTT_SUBSCRIBE - Role: " + role + ", " +
+                        "topic:" + topic + ", name:" + name);
             }
         }
         if (action == "MQTT_SEND_NAME") {
@@ -112,6 +122,13 @@ public class myMqttService extends Service {
                 name = extras.getString("name");
                 Log.d(TAG, "MQTT_SEND_NAME name: " + name);
             }
+            // Good time to write these to a file, so we can retrive them in case
+            // of service restart
+            this.deleteFile("svcdata.txt");
+            writeToFile(topic + ":" + role + ":" + name,
+                    getApplicationContext(), "svcdata.txt");
+            Log.d(TAG, "Role: " + role + ", " +
+                    "topic:" + topic + ", name:" + name);
         }
         if (action == "MQTT_SEND_LOC") {
             Log.d(TAG, "Recvd MQTT Send LOC message.....................");
@@ -125,8 +142,16 @@ public class myMqttService extends Service {
                 publish(topic, name + ":" + lat + ":" + lon);
             }
         }
+        // If we are here without the following values set, we are in trouble.
+        // Default these values for now.
+        if ((role == null) || (topic == null) || (name == null)) {
+            Log.d(TAG, "Null Error !!!! - role: " + role + ", " +
+                    "topic:" + topic + ", name:" + name);
+            readSvcData();
+        }
 
-        mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager = (NotificationManager) this.getSystemService(
+                Context.NOTIFICATION_SERVICE);
         NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID,
                 "my_channel",
                 NotificationManager.IMPORTANCE_LOW);
@@ -179,21 +204,19 @@ public class myMqttService extends Service {
         Notification noti;
         Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Log.d(TAG, "Send Notification...");
+        /*
         String[] arrOfStr = msg.split(":", 4);
         String title = arrOfStr[0].trim();
         String body = arrOfStr[1].trim() + ":" + arrOfStr[2].trim();
+         */
 
         // Create an explicit intent for an Activity in your app
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-        String currentTime = new SimpleDateFormat("HH-mm",
-                Locale.getDefault()).format(new Date());
         noti = new Notification.Builder(this, CHANNEL_ID)
                 //.setContentTitle(title + " : ")
-                .setContentText(arrOfStr[0].trim() + "/" + "Recv GPS at: " +
-                        //"/" + arrOfStr[1].trim() + " :" + arrOfStr[2].trim() +
-                        currentTime)
+                .setContentText(msg)
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentIntent(pendingIntent)
                 //.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 })
@@ -202,13 +225,62 @@ public class myMqttService extends Service {
         mNotificationManager.notify(incr++, noti);
     }
 
+    private boolean readSvcData() {
+        Log.d(TAG, "Read SvcData from file....");
+        File file = getApplicationContext().getFileStreamPath("svcdata.txt");
+        if(file == null || !file.exists()) {
+            Log.d(TAG, "svcdata File not found !!!");
+            return true;
+        }
+        try {
+            InputStream inputStream = getApplicationContext().
+                    openFileInput("svcdata.txt");
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+                if ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                    Log.d(TAG, "Read: " + receiveString);
+                    String[] arrOfStr = receiveString.split(":", 4);
+                    if (arrOfStr.length < 3) {
+                        Log.d(TAG, "Length = " + arrOfStr.length);
+                        return true;
+                    }
+                    Log.d(TAG, "svcdata Parsed..." +
+                            arrOfStr[0] + " : " + arrOfStr[1] +
+                            " : " + arrOfStr[2]);
+                    topic = arrOfStr[0] != null ? arrOfStr[0] : null;
+                    role = arrOfStr[1] != null ? arrOfStr[1] : null;
+                    name = arrOfStr[2] != null ? arrOfStr[2] : null;
+                    Log.d(TAG, "Read svcdata file - role: " + role + ", " +
+                            "topic:" + topic + ", name:" + name);
+                } else {
+                    Log.d(TAG, "No data in svcdata file");
+                }
+                inputStream.close();
+                //ret = stringBuilder.toString();
+                return true;
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e(TAG, "File svcdata not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Can not read svcdata file: " + e.toString());
+        }
+
+        return true;
+    }
+
     private void startMqtt(String topic) throws MqttException {
-        Log.d(TAG, "startMqtt: role: " + role);
+        Log.d(TAG, "startMqtt: role: " + role + ", topic: " + topic +
+                ", name: " + name);
         mqttHelper = new MqttHelper(getApplicationContext(), topic, role);
         mqttHelper.mqttAndroidClient.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable throwable) {
-                Log.d(TAG, "MQTT connection lost !!");
+                //Log.d(TAG, "MQTT connection lost !!");
                 mqttHelper.connect();
             }
 
@@ -234,26 +306,26 @@ public class myMqttService extends Service {
                 if (arrOfStr[0].equals("null")) {
                     Log.d(TAG, "Name is null..not saving or broadcasting");
                 } else {
-                    Log.d(TAG, "Bscat/Saving to file: " + saveLine);
-                    writeToFile(saveLine, getApplicationContext());
-                    writeToFile(lineSeparator, getApplicationContext());
+                    Log.d(TAG, "Bcat/Saving to file: " + saveLine);
+                    writeToFile(saveLine, getApplicationContext(), filename);
+                    writeToFile(lineSeparator, getApplicationContext(), filename);
                     sendBroadcast(intent);
                 }
-                sendNotification(msg);
+                sendNotification("Rec GPS:" + name + "/" + currentTime);
             }
 
             @Override
             public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-                Log.d(TAG, "msg delivered");
+                //Log.d(TAG, "msg delivered");
             }
         });
     }
 
-    private void writeToFile(String data, Context context) {
+    private void writeToFile(String data, Context context, String filename) {
         try {
             try (OutputStreamWriter outputStreamWriter =
                          new OutputStreamWriter(context.openFileOutput
-                                 ("mylocation.txt", Context.MODE_APPEND))) {
+                                 (filename, Context.MODE_APPEND))) {
                 outputStreamWriter.write(data);
                 outputStreamWriter.close();
             }
@@ -270,6 +342,9 @@ public class myMqttService extends Service {
             MqttMessage message = new MqttMessage(encodedInfo);
             mqttHelper.mqttAndroidClient.publish(topic, message);
             Log.d (TAG, "publish done from: " + role);
+            String currentTime = new SimpleDateFormat("HH-mm",
+                    Locale.getDefault()).format(new Date());
+            sendNotification("Sent GPS: " + name + "/" + currentTime);
         } catch (UnsupportedEncodingException | MqttException e) {
             e.printStackTrace();
             Log.e (TAG, e.getMessage());

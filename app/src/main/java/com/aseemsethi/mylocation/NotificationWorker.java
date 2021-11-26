@@ -98,7 +98,7 @@ public class NotificationWorker extends ListenableWorker {
                         sendLocToService(location);
                         //((MainActivity)getActivity()).startChronometer();
                         showNotification("MyLocation", taskDataString != null ?
-                                taskDataString : "GPS data sent");
+                                taskDataString : "GPS Loc sent");
                     }
                 });
             // Return a ListenableFuture<>
@@ -140,7 +140,7 @@ public class NotificationWorker extends ListenableWorker {
         }
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(getApplicationContext(), channelId)
-                .setContentTitle(task)
+                //.setContentTitle(task)
                 .setContentText(desc).setSound(null)
                 .setSmallIcon(R.mipmap.ic_launcher);
         manager.notify(1, builder.build());

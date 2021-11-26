@@ -38,7 +38,7 @@ public class MqttHelper {
         mqttAndroidClient.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable throwable) {
-                Log.d(TAG, "MQTT connection lost");
+                Log.d(TAG, "22 MQTT connection lost");
             }
 
             @Override
@@ -71,12 +71,12 @@ public class MqttHelper {
             mqttAndroidClient.connect(mqttConnectOptions, null, new IMqttActionListener() {
                 @Override
                 public void onSuccess(IMqttToken asyncActionToken) {
-                    Log.d(TAG, "connect succeed with role: " + role);
+                    //Log.d(TAG, "connect succeed with role: " + role);
                     if (role.equals("MGR")) {
-                        Log.d(TAG, "Role is Mgr...");
+                        //Log.d(TAG, "Role is Mgr...");
                         subscribeToTopic(subscriptionTopic);
                     } else {
-                        Log.d(TAG, "Role is Engr....");
+                        //Log.d(TAG, "Role is Engr....");
                     }
                 }
 
