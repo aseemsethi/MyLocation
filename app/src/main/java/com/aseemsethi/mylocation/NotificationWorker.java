@@ -83,6 +83,7 @@ public class NotificationWorker extends ListenableWorker {
                 new SingleShotLocationProvider.LocationCallback() {
                     @Override
                     public void onNewLocationAvailable(SingleShotLocationProvider.GPSCoordinates loc) {
+                        Log.d(TAG, "onNewLocationAvailable");
                         Data taskData = getInputData();
                         String taskDataString = taskData.getString(MainActivity.MESSAGE_STATUS);
                         SingleShotLocationProvider.GPSCoordinates location = loc;

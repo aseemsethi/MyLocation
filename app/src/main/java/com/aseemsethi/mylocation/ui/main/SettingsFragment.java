@@ -65,6 +65,7 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 v.startAnimation(buttonClick);
                 getContext().deleteFile("mylocation.txt");
+                getContext().deleteFile("svcdata.txt");
             }
         });
 

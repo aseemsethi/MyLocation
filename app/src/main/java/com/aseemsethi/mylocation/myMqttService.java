@@ -107,9 +107,9 @@ public class myMqttService extends Service {
                 topic = extras.getString("topic");
                 role = extras.getString("role");
                 name = extras.getString("name");
-                this.deleteFile("svcdata.txt");
-                writeToFile(topic + ":" + role + ":" + name,
-                        getApplicationContext(), "svcdata.txt");
+                //this.deleteFile("svcdata.txt");
+                //writeToFile(topic + ":" + role + ":" + name,
+                //        getApplicationContext(), "svcdata.txt");
                 Log.d(TAG, "MQTT_SUBSCRIBE - Role: " + role + ", " +
                         "topic:" + topic + ", name:" + name);
             }
@@ -124,11 +124,17 @@ public class myMqttService extends Service {
             }
             // Good time to write these to a file, so we can retrive them in case
             // of service restart
-            this.deleteFile("svcdata.txt");
-            writeToFile(topic + ":" + role + ":" + name,
-                    getApplicationContext(), "svcdata.txt");
+            File file = getApplicationContext().getFileStreamPath("svcdata.txt");
+            if(file == null || !file.exists()) {
+                Log.d(TAG, "svcdata File not created as yet");
+                writeToFile(topic + ":" + role + ":" + name,
+                        getApplicationContext(), "svcdata.txt");
+            } else {
+                Log.d(TAG, "svcdata File already exists");
+            }
             Log.d(TAG, "Role: " + role + ", " +
                     "topic:" + topic + ", name:" + name);
+            return START_STICKY;
         }
         if (action == "MQTT_SEND_LOC") {
             Log.d(TAG, "Recvd MQTT Send LOC message.....................");
@@ -136,11 +142,11 @@ public class myMqttService extends Service {
             if(extras == null) {
                 Log.d(TAG,"null MQTT_SEND_LOC");
             } else {
-                Log.d(TAG, "MQTT_SEND_LOC");
                 Float lat = (Float) extras.getFloat("lat");
                 Float lon = (Float) extras.getFloat("lon");
                 publish(topic, name + ":" + lat + ":" + lon);
             }
+            return START_STICKY;
         }
         // If we are here without the following values set, we are in trouble.
         // Default these values for now.
@@ -161,14 +167,17 @@ public class myMqttService extends Service {
         //mChannel.setVibrationPattern(new long[] { 0, 400, 200, 400});
         mNotificationManager.createNotificationChannel(mChannel);
 
-        if (running == true) {
+        /* if (running == true) {
             Log.d(TAG, "MQTT Service is already running");
-            //mqttHelper.subscribeToTopic("aseemsethi");
-            //mqttHelper.connect();
         }
-        if ((running == true) && mqttHelper.isConnected()) {
-            Log.d(TAG, "MQTT Service is already connected");
-            return START_STICKY;
+         */
+        if (mqttHelper != null) {
+            if ((running == true) && mqttHelper.isConnected()) {
+                Log.d(TAG, "MQTT Service is already connected");
+                return START_STICKY;
+            }
+        } else {
+            Log.d(TAG, "mqtthelper is null");
         }
         Log.d(TAG, "restarting MQTT Service");
         try {
@@ -311,7 +320,7 @@ public class myMqttService extends Service {
                     writeToFile(lineSeparator, getApplicationContext(), filename);
                     sendBroadcast(intent);
                 }
-                sendNotification("Rec GPS:" + name + "/" + currentTime);
+                sendNotification("Recv GPS:" + arrOfStr[0] + "/" + currentTime);
             }
 
             @Override
