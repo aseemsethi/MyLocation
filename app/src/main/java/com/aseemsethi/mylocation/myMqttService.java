@@ -190,13 +190,15 @@ public class myMqttService extends Service {
         // The following "startForeground" with a notification is what makes
         // the service run in the background and not get killed, when the app gets
         // killed by the user.
+        String currentTime = new SimpleDateFormat("HH-mm",
+                Locale.getDefault()).format(new Date());
         intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Notification noti = new Notification.Builder(this, CHANNEL_ID)
                 //.setContentTitle("MQTT:")
-                .setContentText("Start Svc: " + Calendar.getInstance().getTime())
+                .setContentText("Start Svc at: " + currentTime)
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentIntent(pendingIntent)
                 .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
@@ -289,7 +291,7 @@ public class myMqttService extends Service {
         mqttHelper.mqttAndroidClient.setCallback(new MqttCallback() {
             @Override
             public void connectionLost(Throwable throwable) {
-                //Log.d(TAG, "MQTT connection lost !!");
+                Log.d(TAG, "MQTT connection lost !!");
                 mqttHelper.connect();
             }
 
@@ -320,7 +322,7 @@ public class myMqttService extends Service {
                     writeToFile(lineSeparator, getApplicationContext(), filename);
                     sendBroadcast(intent);
                 }
-                sendNotification("Recv GPS:" + arrOfStr[0] + "/" + currentTime);
+                sendNotification("GPS:" + arrOfStr[0] + "/" + currentTime);
             }
 
             @Override

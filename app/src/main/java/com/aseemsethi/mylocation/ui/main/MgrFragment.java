@@ -8,11 +8,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -33,9 +35,14 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.ButtCap;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.maps.android.ui.IconGenerator;
 
 import java.io.BufferedReader;
@@ -58,6 +65,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
     GoogleMap map;
     String role;
     IconGenerator iconFactory;
+    private AlphaAnimation buttonClick = new AlphaAnimation(1F, 0.1F);
 
     private PageViewModel pageViewModel;
     private MgrFragmentBinding binding;
@@ -113,16 +121,18 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG, "onClick");
+                    v.startAnimation(buttonClick);
+                    map.clear();
+                    readFromFile(getContext(), binding.nameMgr.getText().toString());
                 }
             });
         }
         return root;
     }
 
-    private String readFromFile(Context context) {
+    private String readFromFile(Context context, String nameS) {
         String ret = "";
-        Log.d(TAG, "Read from file....");
+        Log.d(TAG, "Read from file: " + nameS);
         File file = context.getFileStreamPath("mylocation.txt");
         if(file == null || !file.exists()) {
             Log.d(TAG, "File not found !!!");
@@ -131,13 +141,20 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         try {
             InputStream inputStream = context.openFileInput("mylocation.txt");
             if ( inputStream != null ) {
+                PolylineOptions options = new PolylineOptions();
+                options.color(Color.RED);
+                options.endCap(new ButtCap());
+                options.endCap(new RoundCap());
+                options.visible(true);
+                options.jointType(JointType.ROUND);
+
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 String receiveString = "";
                 StringBuilder stringBuilder = new StringBuilder();
                 while ( (receiveString = bufferedReader.readLine()) != null ) {
                     stringBuilder.append("\n").append(receiveString);
-                    Log.d(TAG, "Read: " + receiveString);
+                    //Log.d(TAG, "Read: " + receiveString);
                     String[] arrOfStr = receiveString.split(":", 5);
                     if (arrOfStr.length < 3) {
                         Log.d(TAG, "Length = " + arrOfStr.length);
@@ -149,7 +166,15 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                     float lat = Float.parseFloat(arrOfStr[1]);
                     float lon = Float.parseFloat(arrOfStr[2]);
                     String currentTime = arrOfStr[3];
-                    updateMap(arrOfStr[0], lat, lon, currentTime);
+                    if ((nameS == null) || (nameS.equals(""))) {
+                        updateMap(arrOfStr[0], lat, lon, currentTime);
+                    } else {
+                        if (arrOfStr[0].equalsIgnoreCase(nameS)) {
+                            updateMap(arrOfStr[0], lat, lon, currentTime);
+                            options.add(new LatLng(lat, lon));
+                            map.addPolyline(options);
+                        }
+                    }
                 }
                 inputStream.close();
                 //ret = stringBuilder.toString();
@@ -157,9 +182,9 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
             }
         }
         catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
+            Log.e(TAG, "File not found: " + e.toString());
         } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
+            Log.e(TAG, "Can not read file: " + e.toString());
         }
 
         return ret;
@@ -170,6 +195,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         Log.d(TAG, "onMapReady called.....");
         iconFactory = new IconGenerator(getContext());
         map = mGoogleMap;
+        map.clear();
         mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
         if (ActivityCompat.checkSelfPermission(getContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) !=
@@ -186,7 +212,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 .visible(true).title("nil").position(new LatLng(43.1, -87.9)));
         m.showInfoWindow();
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(43.1, -87.9), 10));
-        readFromFile(getContext());
+        readFromFile(getContext(), null);
     }
     public void updateMap(String name, float lat, float lon, String currentTime) {
         // Updates the location and zoom of the MapView

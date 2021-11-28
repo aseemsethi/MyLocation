@@ -1,7 +1,9 @@
 package com.aseemsethi.mylocation.ui.main;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +22,12 @@ import com.aseemsethi.mylocation.SingleShotLocationProvider;
 import com.aseemsethi.mylocation.databinding.SettingsFragmentBinding;
 import com.aseemsethi.mylocation.myMqttService;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -32,6 +39,7 @@ public class SettingsFragment extends Fragment {
 
     private PageViewModel pageViewModel;
     private SettingsFragmentBinding binding;
+    Integer number = 0;
 
     public static SettingsFragment newInstance(int index) {
         SettingsFragment fragment = new SettingsFragment();
@@ -83,9 +91,53 @@ public class SettingsFragment extends Fragment {
                 getContext().startService(serviceIntent);
             }
         });
+
+        final Button btnGPS = binding.buttonGPS;
+        binding.gpsLogs.setMovementMethod(new ScrollingMovementMethod());
+        btnGPS.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.startAnimation(buttonClick);
+                String str = readLogsFromFile(getContext());
+                binding.gpsLogs.setText("Num entries: " + number);
+                binding.gpsLogs.append(str);
+            }
+        });
         return root;
     }
 
+    private String readLogsFromFile(Context context) {
+        String ret = "";
+        number = 0;
+        File file = context.getFileStreamPath("mylocation.txt");
+        if(file == null || !file.exists()) {
+            Log.d(TAG, "File not found !!!");
+            return "GPS log not created..";
+        }
+        try {
+            InputStream inputStream = context.openFileInput("mylocation.txt");
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                    Log.d(TAG, "Read: " + receiveString);
+                    number++;
+                }
+                inputStream.close();
+                ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e(TAG, "File not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Can not read file: " + e.toString());
+        }
+
+        return ret;
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();

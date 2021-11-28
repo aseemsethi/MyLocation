@@ -29,37 +29,71 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:gravity="center"
-            android:text="Aseem" />
+            android:text="ABC" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/LinearLayout02"
+        android:id="@+id/gpsLogsL"
+        android:layout_width="fill_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="10dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/settingsSF"
+        android:weightSum="1">
+
+        <TextView
+            android:id="@+id/gpsLogs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:fadeScrollbars="false"
+            android:scrollbarSize="4dp"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:scrollbarThumbVertical="@color/black"
+            android:gravity="center"
+            android:scrollbars="vertical"
+            android:text="GPS Logs:" />
+    </LinearLayout>
+
+    <TableRow
+        android:id="@+id/tableRow1"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_alignParentBottom="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/settingsSF" >
+        app:layout_constraintTop_toBottomOf="@+id/settingsSF">
         <Button
             android:id="@+id/buttonSF"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_horizontal"
             style="@style/AppTheme.RoundedCornerMaterialButton"
-            android:layout_weight="1"
             android:text="Save">
         </Button>
         <Button
             android:id="@+id/buttonDF"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
+            android:text="Del Cfg"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="10dp"
-            android:layout_weight="1"
+            android:layout_marginLeft="5dp"
             style="@style/AppTheme.RoundedCornerMaterialButton"
-            android:text="Del Loc/Cfg File">
+            android:layout_gravity="center|center_horizontal">
         </Button>
-    </LinearLayout>
+        <Button
+            android:id="@+id/buttonGPS"
+            android:layout_width="wrap_content"
+            android:text="GPS Logs"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            style="@style/AppTheme.RoundedCornerMaterialButton"
+            android:layout_gravity="center|center_horizontal">
+        </Button>
+    </TableRow>
 </androidx.constraintlayout.widget.ConstraintLayout>
