@@ -109,6 +109,15 @@ public class PlaceholderFragment extends Fragment {
                         // setting a backoff on case the work needs to retry
                         .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
                         .build();
+        PeriodicWorkRequest periodicSyncDataWork1 =
+                new PeriodicWorkRequest.Builder(NotificationWorker.class,
+                        15, TimeUnit.MINUTES)
+                        .addTag("TAG_GET_GPS_DATA1")
+                        .setConstraints(constraints)
+                        .setInitialDelay(7, TimeUnit.MINUTES)
+                        // setting a backoff on case the work needs to retry
+                        .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                        .build();
         btnS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -118,9 +127,14 @@ public class PlaceholderFragment extends Fragment {
                 btnS.setClickable(false);
                 mWorkManager.enqueueUniquePeriodicWork(
                         "GPS_DATA_WORK",
-                        //ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
-                        ExistingPeriodicWorkPolicy.REPLACE, //Existing Periodic Work policy
+                        ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
+                        //ExistingPeriodicWorkPolicy.REPLACE, //Existing Periodic Work policy
                         periodicSyncDataWork //work request
+                );
+                mWorkManager.enqueueUniquePeriodicWork(
+                        "GPS_DATA_WORK1",
+                        ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
+                        periodicSyncDataWork1 //work request
                 );
                 Toast.makeText(getContext(),
                         "Starting GPS periodic task", Toast.LENGTH_LONG).show();

@@ -2,6 +2,7 @@ package com.aseemsethi.mylocation.ui.main;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -77,13 +78,25 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        SharedPreferences sharedPref = getActivity().
+                getPreferences(Context.MODE_PRIVATE);
+        String nm = sharedPref.getString("Name", "abc");
+        binding.nameansSF.setText(nm);
+
         final Button btn = binding.buttonSF;
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 v.startAnimation(buttonClick);
-                Log.d(TAG, "Save Name: " + binding.nameansSF.getText().toString());
-                pageViewModel.setName(binding.nameansSF.getText().toString());
+                String nm = binding.nameansSF.getText().toString();
+                Log.d(TAG, "Save Name: " + nm);
+                pageViewModel.setName(nm);
+
+                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString("Name", nm);
+                editor.apply();
+
                 Intent serviceIntent = new Intent(getContext(),
                         myMqttService.class);
                 serviceIntent.setAction(myMqttService.MQTT_SEND_NAME);

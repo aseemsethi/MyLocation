@@ -97,9 +97,8 @@ public class NotificationWorker extends ListenableWorker {
                         completer.set(Result.success(oData));
                         callback.onResponse(oData);
                         sendLocToService(location);
-                        //((MainActivity)getActivity()).startChronometer();
-                        showNotification("MyLocation", taskDataString != null ?
-                                taskDataString : "GPS Loc sent");
+                        //showNotification("MyLocation", taskDataString != null ?
+                          //      taskDataString : "GPS Loc sent");
                     }
                 });
             // Return a ListenableFuture<>

@@ -348,19 +348,21 @@ public class myMqttService extends Service {
     public void publish(String topic, String info)
     {
         byte[] encodedInfo = new byte[0];
+        String currentTime = new SimpleDateFormat("HH-mm",
+                Locale.getDefault()).format(new Date());
         try {
             encodedInfo = info.getBytes("UTF-8");
             MqttMessage message = new MqttMessage(encodedInfo);
             mqttHelper.mqttAndroidClient.publish(topic, message);
             Log.d (TAG, "publish done from: " + role);
-            String currentTime = new SimpleDateFormat("HH-mm",
-                    Locale.getDefault()).format(new Date());
             sendNotification("Sent GPS: " + name + "/" + currentTime);
         } catch (UnsupportedEncodingException | MqttException e) {
             e.printStackTrace();
             Log.e (TAG, e.getMessage());
+            //sendNotification("Failed1: " + "/" + e.getMessage());
         }catch (Exception e) {
-            Log.e (TAG, "general exception "+e.getMessage());
+            Log.e (TAG, "general exception "+ e.getMessage());
+            //sendNotification("Failed2:" + "/" + e.getMessage());
         }
     }
 
