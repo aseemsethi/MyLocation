@@ -15,18 +15,11 @@
         android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints">
-        <TextView
-            android:id="@+id/nameMgr1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.3"
-            android:gravity="center"
-            android:text="Name:" />
         <EditText
             android:id="@+id/nameMgr"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="0.7"
+            android:layout_weight="0.4"
             android:gravity="center"
             android:text="" />
         <Button
@@ -39,7 +32,19 @@
             android:layout_marginBottom="8dp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            android:text="Go"
+            android:text="Single"
+            android:textAllCaps="false" />
+        <Button
+            android:id="@+id/buttonLast"
+            android:gravity="center"
+            style="@style/AppTheme.RoundedCornerMaterialButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:text="Final"
             android:textAllCaps="false" />
     </LinearLayout>
     <TextView

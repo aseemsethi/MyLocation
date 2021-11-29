@@ -1,5 +1,7 @@
 package com.aseemsethi.mylocation.ui.main;
 
+import static com.aseemsethi.mylocation.MainActivity.ROLE;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -75,6 +78,7 @@ public class SettingsFragment extends Fragment {
                 v.startAnimation(buttonClick);
                 getContext().deleteFile("mylocation.txt");
                 getContext().deleteFile("svcdata.txt");
+                getContext().deleteFile("clients.txt");
             }
         });
 
@@ -82,6 +86,12 @@ public class SettingsFragment extends Fragment {
                 getPreferences(Context.MODE_PRIVATE);
         String nm = sharedPref.getString("Name", "abc");
         binding.nameansSF.setText(nm);
+        pageViewModel.setName(nm);
+        Intent serviceIntent = new Intent(getContext(),
+                myMqttService.class);
+        serviceIntent.setAction(myMqttService.MQTT_SEND_NAME);
+        serviceIntent.putExtra("name", nm);
+        getContext().startService(serviceIntent);
 
         final Button btn = binding.buttonSF;
         btn.setOnClickListener(new View.OnClickListener() {
@@ -92,7 +102,8 @@ public class SettingsFragment extends Fragment {
                 Log.d(TAG, "Save Name: " + nm);
                 pageViewModel.setName(nm);
 
-                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences sharedPref = getActivity().getPreferences(
+                        Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putString("Name", nm);
                 editor.apply();
@@ -111,24 +122,32 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 v.startAnimation(buttonClick);
-                String str = readLogsFromFile(getContext());
-                binding.gpsLogs.setText("Num entries: " + number);
+                if (ROLE.equals("ENG")) {
+                    Toast.makeText(getContext(),
+                            "Logs disabled", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                String str = readLogsFromFile(getContext(), "mylocation.txt");
+                binding.gpsLogs.setText("\nNum Logs: " + number);
                 binding.gpsLogs.append(str);
+                String cl = readLogsFromFile(getContext(), "clients.txt");
+                binding.gpsLogs.append("\nNum Clients: " + number);
+                binding.gpsLogs.append(cl);
             }
         });
         return root;
     }
 
-    private String readLogsFromFile(Context context) {
+    private String readLogsFromFile(Context context, String filename) {
         String ret = "";
         number = 0;
-        File file = context.getFileStreamPath("mylocation.txt");
+        File file = context.getFileStreamPath(filename);
         if(file == null || !file.exists()) {
-            Log.d(TAG, "File not found !!!");
-            return "GPS log not created..";
+            Log.d(TAG, "File not found: " + filename);
+            return "\nLog not created..";
         }
         try {
-            InputStream inputStream = context.openFileInput("mylocation.txt");
+            InputStream inputStream = context.openFileInput(filename);
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -148,9 +167,9 @@ public class SettingsFragment extends Fragment {
         } catch (IOException e) {
             Log.e(TAG, "Can not read file: " + e.toString());
         }
-
         return ret;
     }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

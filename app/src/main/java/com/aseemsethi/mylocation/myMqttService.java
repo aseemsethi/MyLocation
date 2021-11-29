@@ -280,7 +280,6 @@ public class myMqttService extends Service {
         } catch (IOException e) {
             Log.e(TAG, "Can not read svcdata file: " + e.toString());
         }
-
         return true;
     }
 
@@ -320,6 +319,7 @@ public class myMqttService extends Service {
                     Log.d(TAG, "Bcat/Saving to file: " + saveLine);
                     writeToFile(saveLine, getApplicationContext(), filename);
                     writeToFile(lineSeparator, getApplicationContext(), filename);
+                    writeUniqueClientFile(arrOfStr[0].trim());
                     sendBroadcast(intent);
                 }
                 sendNotification("GPS:" + arrOfStr[0] + "/" + currentTime);
@@ -332,6 +332,51 @@ public class myMqttService extends Service {
         });
     }
 
+    private void writeUniqueClientFile(String namePassed) {
+        // We write unique Clients in this file
+        String nameC;
+        boolean found = false;
+        Log.d(TAG, "WriteUnique - Read Clients from file...." + namePassed);
+        File file = getApplicationContext().getFileStreamPath("clients.txt");
+        if(file == null || !file.exists()) {
+            Log.d(TAG, "client File not created as yet");
+        }
+        try {
+            InputStream inputStream = getApplicationContext().
+                    openFileInput("clients.txt");
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                        Log.d(TAG, "Read: " + receiveString);
+                    String[] arrOfStr = receiveString.split(":", 2);
+                    if (arrOfStr.length < 1) {
+                        Log.d(TAG, "Length = " + arrOfStr.length);
+                        return;
+                    }
+                    Log.d(TAG, "clients Parsed..." + arrOfStr[0]);
+                    nameC = arrOfStr[0];
+                    if (nameC.equals(namePassed)) {
+                        found = true;
+                    }
+                }
+                inputStream.close();
+                //ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e(TAG, "File clients not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Can not read clients file: " + e.toString());
+        }
+        if (found == false) {
+            Log.d(TAG, "Wrote unqiue client to file: " + namePassed);
+            writeToFile(namePassed, getApplicationContext(), "clients.txt");
+            writeToFile(lineSeparator, getApplicationContext(), "clients.txt");
+        }
+    }
     private void writeToFile(String data, Context context, String filename) {
         try {
             try (OutputStreamWriter outputStreamWriter =

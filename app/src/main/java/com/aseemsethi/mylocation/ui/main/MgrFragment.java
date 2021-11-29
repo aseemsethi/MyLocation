@@ -123,14 +123,95 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 public void onClick(View v) {
                     v.startAnimation(buttonClick);
                     map.clear();
-                    readFromFile(getContext(), binding.nameMgr.getText().toString());
+                    readFromFile(getContext(), binding.nameMgr.getText().toString(), false);
+                }
+            });
+            final Button btnLast = binding.buttonLast;
+            btnLast.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    v.startAnimation(buttonClick);
+                    map.clear();
+                    updateLastOnMap(getContext());
                 }
             });
         }
         return root;
     }
 
-    private String readFromFile(Context context, String nameS) {
+    private void updateLastOnMap(Context context) {
+        String nameC;
+        String lastLoc = null;
+        Boolean found = false;
+        String[] arrOfStr1;
+
+        File fileL = context.getFileStreamPath("mylocation.txt");
+        if(fileL == null || !fileL.exists()) {
+            Log.d(TAG, "GPS File not found !!!");
+            return;
+        }
+        File fileC = context.getFileStreamPath("clients.txt");
+        if(fileC == null || !fileC.exists()) {
+            Log.d(TAG, "Clients File not found !!!");
+            return;
+        }
+
+        try {
+            InputStream inputStream = context.openFileInput("clients.txt");
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                    String[] arrOfStr = receiveString.split(":", 2);
+                    Log.d(TAG, "clients Parsed..." + arrOfStr[0]);
+                    nameC = arrOfStr[0];
+                    try {
+                        InputStream inputStream1 = context.openFileInput("mylocation.txt");
+                        if ( inputStream != null ) {
+                            InputStreamReader inputStreamReader1 = new InputStreamReader(inputStream1);
+                            BufferedReader bufferedReader1 = new BufferedReader(inputStreamReader1);
+                            String receiveString1 = "";
+                            StringBuilder stringBuilder1 = new StringBuilder();
+                            while ( (receiveString1 = bufferedReader1.readLine()) != null ) {
+                                arrOfStr1 = receiveString1.split(":", 5);
+                                //Log.d(TAG, "GPS Parsed..." + arrOfStr1[0]);
+                                if (nameC.equals(arrOfStr1[0])) {
+                                    lastLoc = receiveString1; found = true;
+                                }
+                            }
+                            inputStream1.close();
+                            if (found) {
+                                arrOfStr1 = lastLoc.split(":", 5);
+                                float lat = Float.parseFloat(arrOfStr1[1]);
+                                float lon = Float.parseFloat(arrOfStr1[2]);
+                                String currentTime = arrOfStr1[3];
+                                Log.d(TAG, "Found lastLoc..." + arrOfStr1[0] + " : "
+                                        + arrOfStr1[1] + " : " + arrOfStr1[2] + ":"
+                                        + arrOfStr1[3]);
+                                updateMap(arrOfStr1[0], lat, lon, currentTime);
+                            }
+                        }
+                    }
+                    catch (FileNotFoundException e) {
+                        Log.e(TAG, "File Location not found: " + e.toString());
+                    } catch (IOException e) {
+                        Log.e(TAG, "Can not read Location file: " + e.toString());
+                    }
+                }
+                inputStream.close();
+                //ret = stringBuilder.toString();
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e(TAG, "File clients not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Can not read clients file: " + e.toString());
+        }
+    }
+
+    private String readFromFile(Context context, String nameS, Boolean finalLoc) {
         String ret = "";
         Log.d(TAG, "Read from file: " + nameS);
         File file = context.getFileStreamPath("mylocation.txt");
@@ -212,9 +293,16 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 .visible(true).title("nil").position(new LatLng(43.1, -87.9)));
         m.showInfoWindow();
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(43.1, -87.9), 10));
-        readFromFile(getContext(), null);
+        readFromFile(getContext(), null, false);
     }
     public void updateMap(String name, float lat, float lon, String currentTime) {
+        if (map == null) {
+            Log.d(TAG, "map is null...........................");
+            return;
+        }
+        if (role.equals("ENG")) {
+            return;
+        }
         // Updates the location and zoom of the MapView
         Marker m = map.addMarker(new MarkerOptions().
                 visible(true).
