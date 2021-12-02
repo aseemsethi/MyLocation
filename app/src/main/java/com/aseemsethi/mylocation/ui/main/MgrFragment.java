@@ -123,7 +123,8 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 public void onClick(View v) {
                     v.startAnimation(buttonClick);
                     map.clear();
-                    readFromFile(getContext(), binding.nameMgr.getText().toString(), false);
+                    readFromFile(getContext(),
+                            binding.nameMgr.getText().toString(), false);
                 }
             });
             final Button btnLast = binding.buttonLast;
@@ -145,6 +146,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         Boolean found = false;
         String[] arrOfStr1;
 
+        Log.d(TAG, "UpdateLastOnMao..");
         File fileL = context.getFileStreamPath("mylocation.txt");
         if(fileL == null || !fileL.exists()) {
             Log.d(TAG, "GPS File not found !!!");
