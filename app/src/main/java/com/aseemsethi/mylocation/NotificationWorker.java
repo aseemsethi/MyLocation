@@ -57,6 +57,7 @@ public class NotificationWorker extends ListenableWorker {
     @Override
     public ListenableFuture<Result> startWork() {
         return CallbackToFutureAdapter.getFuture(completer -> {
+            final Data[] out = new Data[1];
             MyCallback callback = new MyCallback() {
                 public void onFailure() {
                     Log.d(TAG, "Listenable startWork failure");
@@ -66,16 +67,36 @@ public class NotificationWorker extends ListenableWorker {
                 public void onResponse(Data oData) {
                     Log.d(TAG, "Listenable startWork success");
                     completer.set(Result.success(oData));
+                    out[0] = oData;
                 }
             };
-            xyz(completer, callback);
-            return callback;
+            //xyz(completer, callback);
+            SingleShotLocationProvider.requestSingleUpdate(getApplicationContext(),
+                    new SingleShotLocationProvider.LocationCallback() {
+                        @Override
+                        public void onNewLocationAvailable(
+                                SingleShotLocationProvider.GPSCoordinates loc) {
+                            Log.d(TAG, "onNewLocationAvailable");
+                            Data taskData = getInputData();
+                            String taskDataString = taskData.getString(MainActivity.MESSAGE_STATUS);
+                            SingleShotLocationProvider.GPSCoordinates location = loc;
+                            Log.d(TAG, "getLocation() LAT: " + location.latitude +
+                                    ", LON: " + location.longitude + ": " + taskDataString);
+                            //String l = Double.toString(location.latitude);
+                            Data oData = new Data.Builder()
+                                    .putFloat("LAT", location.latitude)
+                                    .putFloat("LON", location.longitude)
+                                    .build();
+                            completer.set(Result.success(oData));
+                            callback.onResponse(oData);
+                            sendLocToService(location);
+                        }
+                    });
+            return ListenableWorker.Result.success(out[0]);
+            //return callback;
         });
     }
-    //@NonNull
-    //@Override
-    //public ListenableFuture<Result> startWork() {
-        public void xyz(CallbackToFutureAdapter.Completer completer, MyCallback callback) {
+    public void xyz(CallbackToFutureAdapter.Completer completer, MyCallback callback) {
         Log.d(TAG, "Listenable startWork...");
         Data input = getInputData();
         Context context = getApplicationContext();
@@ -97,12 +118,8 @@ public class NotificationWorker extends ListenableWorker {
                         completer.set(Result.success(oData));
                         callback.onResponse(oData);
                         sendLocToService(location);
-                        //showNotification("MyLocation", taskDataString != null ?
-                          //      taskDataString : "GPS Loc sent");
                     }
                 });
-            // Return a ListenableFuture<>
-        //return null;
     }
 
     public void sendLocToService(SingleShotLocationProvider.GPSCoordinates location) {

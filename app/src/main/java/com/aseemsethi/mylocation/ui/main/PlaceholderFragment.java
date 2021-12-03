@@ -31,6 +31,7 @@ import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.Operation;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -125,19 +126,19 @@ public class PlaceholderFragment extends Fragment {
                 v.startAnimation(buttonClick);
                 Log.d(TAG, "Starting periodic task");
                 btnS.setClickable(false);
-                mWorkManager.enqueueUniquePeriodicWork(
+                Operation op1 = mWorkManager.enqueueUniquePeriodicWork(
                         "GPS_DATA_WORK",
                         ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
                         //ExistingPeriodicWorkPolicy.REPLACE, //Existing Periodic Work policy
                         periodicSyncDataWork //work request
                 );
-                mWorkManager.enqueueUniquePeriodicWork(
+                Operation op2 = mWorkManager.enqueueUniquePeriodicWork(
                         "GPS_DATA_WORK1",
                         ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
                         periodicSyncDataWork1 //work request
                 );
                 Toast.makeText(getContext(),
-                        "Starting GPS periodic task", Toast.LENGTH_LONG).show();
+                        "Starting GPS periodic task", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -149,7 +150,7 @@ public class PlaceholderFragment extends Fragment {
                 btnS.setClickable(true);
                 WorkManager.getInstance(getContext()).cancelAllWorkByTag("TAG_GET_GPS_DATA");
                 Toast.makeText(getContext(),
-                        "Cancelling GPS periodic task", Toast.LENGTH_LONG).show();
+                        "Cancelling GPS periodic task", Toast.LENGTH_SHORT).show();
             }
         });
 

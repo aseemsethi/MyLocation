@@ -32,7 +32,7 @@
             android:layout_marginBottom="8dp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            android:text="Single"
+            android:text="Track"
             android:textAllCaps="false" />
         <Button
             android:id="@+id/buttonLast"

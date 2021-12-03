@@ -120,20 +120,24 @@ public class myMqttService extends Service {
                 Log.d(TAG,"null MQTT_SEND_NAME");
             } else {
                 name = extras.getString("name");
-                Log.d(TAG, "MQTT_SEND_NAME name: " + name);
+                topic = extras.getString("group");
+                Log.d(TAG, "MQTT_SEND_NAME name: " + name + ", group:" + topic);
             }
             // Good time to write these to a file, so we can retrive them in case
             // of service restart
             File file = getApplicationContext().getFileStreamPath("svcdata.txt");
             if(file == null || !file.exists()) {
                 Log.d(TAG, "svcdata File not created as yet");
-                writeToFile(topic + ":" + role + ":" + name,
-                        getApplicationContext(), "svcdata.txt");
             } else {
                 Log.d(TAG, "svcdata File already exists");
+                deleteFile("svcdata.txt");
             }
+            writeToFile(topic + ":" + role + ":" + name,
+                    getApplicationContext(), "svcdata.txt");
             Log.d(TAG, "Role: " + role + ", " +
                     "topic:" + topic + ", name:" + name);
+            if (mqttHelper != null)
+                mqttHelper.subscribeToTopic(topic);
             return START_STICKY;
         }
         if (action == "MQTT_SEND_LOC") {
@@ -238,7 +242,8 @@ public class myMqttService extends Service {
 
     private boolean readSvcData() {
         Log.d(TAG, "Read SvcData from file....");
-        File file = getApplicationContext().getFileStreamPath("svcdata.txt");
+        File file = getApplicationContext().getFileStreamPath(
+                "svcdata.txt");
         if(file == null || !file.exists()) {
             Log.d(TAG, "svcdata File not found !!!");
             return true;
@@ -399,7 +404,7 @@ public class myMqttService extends Service {
             encodedInfo = info.getBytes("UTF-8");
             MqttMessage message = new MqttMessage(encodedInfo);
             mqttHelper.mqttAndroidClient.publish(topic, message);
-            Log.d (TAG, "publish done from: " + role);
+            Log.d (TAG, "publish done from: " + role + ", on:" + topic);
             sendNotification("Sent GPS: " + name + "/" + currentTime);
         } catch (UnsupportedEncodingException | MqttException e) {
             e.printStackTrace();

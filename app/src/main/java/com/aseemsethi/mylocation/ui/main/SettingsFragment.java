@@ -79,18 +79,23 @@ public class SettingsFragment extends Fragment {
                 getContext().deleteFile("mylocation.txt");
                 getContext().deleteFile("svcdata.txt");
                 getContext().deleteFile("clients.txt");
+                Toast.makeText(getContext(),
+                        "Deleting Cfg/logs", Toast.LENGTH_SHORT).show();
             }
         });
 
         SharedPreferences sharedPref = getActivity().
                 getPreferences(Context.MODE_PRIVATE);
-        String nm = sharedPref.getString("Name", "abc");
+        String nm = sharedPref.getString("name", "abc");
+        String grp = sharedPref.getString("group", "myGroup");
         binding.nameansSF.setText(nm);
+        binding.groupSF.setText(grp);
         pageViewModel.setName(nm);
         Intent serviceIntent = new Intent(getContext(),
                 myMqttService.class);
         serviceIntent.setAction(myMqttService.MQTT_SEND_NAME);
         serviceIntent.putExtra("name", nm);
+        serviceIntent.putExtra("group", grp);
         getContext().startService(serviceIntent);
 
         final Button btn = binding.buttonSF;
@@ -102,16 +107,21 @@ public class SettingsFragment extends Fragment {
                 Log.d(TAG, "Save Name: " + nm);
                 pageViewModel.setName(nm);
 
+                String grp = binding.groupSF.getText().toString();
+                Log.d(TAG, "Save Group: " + grp);
+
                 SharedPreferences sharedPref = getActivity().getPreferences(
                         Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString("Name", nm);
+                editor.putString("name", nm);
+                editor.putString("group", grp);
                 editor.apply();
 
                 Intent serviceIntent = new Intent(getContext(),
                         myMqttService.class);
                 serviceIntent.setAction(myMqttService.MQTT_SEND_NAME);
                 serviceIntent.putExtra("name", pageViewModel.getName());
+                serviceIntent.putExtra("group", grp);
                 getContext().startService(serviceIntent);
             }
         });

@@ -28,6 +28,13 @@ import android.view.View;
 import com.aseemsethi.mylocation.ui.main.SectionsPagerAdapter;
 import com.aseemsethi.mylocation.databinding.ActivityMainBinding;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MyLocation";
     public static final String MESSAGE_STATUS = "message_status";
@@ -39,8 +46,8 @@ public class MainActivity extends AppCompatActivity {
     BroadcastReceiver myReceiverMqttStatus = null;
     private ActivityMainBinding binding;
     private PageViewModel pageViewModel;
-    String personName;
-    String topicG = "myLocation";
+    String name, topic;
+    //String topicG = "myGroup";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +71,13 @@ public class MainActivity extends AppCompatActivity {
             //tabs.setTabTextColors(Color.parseColor("#727272"), Color.parseColor("#ffffff"));
         }
         Log.d(TAG, "Role: " + ROLE);
+        readSvcData();
         Intent serviceIntent = new Intent(getApplicationContext(),
                 myMqttService.class);
         serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
-        serviceIntent.putExtra("topic", topicG);
+        serviceIntent.putExtra("topic", topic);
         serviceIntent.putExtra("role", ROLE);
-        serviceIntent.putExtra("name", personName);
+        serviceIntent.putExtra("name", name);
         startService(serviceIntent);
     }
 
@@ -101,10 +109,11 @@ public class MainActivity extends AppCompatActivity {
                 }
                 Log.d(TAG, "registerServices: restart mqttService");
                 Intent serviceIntent = new Intent(context, myMqttService.class);
+                readSvcData();
                 serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
-                serviceIntent.putExtra("topic", topicG);
+                serviceIntent.putExtra("topic", topic);
                 serviceIntent.putExtra("role", ROLE);
-                serviceIntent.putExtra("name", personName);
+                serviceIntent.putExtra("name", name);
                 startService(serviceIntent);
             }
         };
@@ -137,5 +146,53 @@ public class MainActivity extends AppCompatActivity {
         pageViewModel.setRole(ROLE);
         Log.d(TAG, "OnStart - Register BroadcastReceiver");
         registerServices();
+    }
+
+    private boolean readSvcData() {
+        Log.d(TAG, "Read SvcData from file....");
+        File file = getApplicationContext().getFileStreamPath(
+                "svcdata.txt");
+        if(file == null || !file.exists()) {
+            Log.d(TAG, "svcdata File not found !!!");
+            return true;
+        }
+        try {
+            InputStream inputStream = getApplicationContext().
+                    openFileInput("svcdata.txt");
+            if ( inputStream != null ) {
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                String receiveString = "";
+                StringBuilder stringBuilder = new StringBuilder();
+                if ( (receiveString = bufferedReader.readLine()) != null ) {
+                    stringBuilder.append("\n").append(receiveString);
+                    Log.d(TAG, "Read: " + receiveString);
+                    String[] arrOfStr = receiveString.split(":", 4);
+                    if (arrOfStr.length < 3) {
+                        Log.d(TAG, "Length = " + arrOfStr.length);
+                        return true;
+                    }
+                    Log.d(TAG, "svcdata Parsed..." +
+                            arrOfStr[0] + " : " + arrOfStr[1] +
+                            " : " + arrOfStr[2]);
+                    topic = arrOfStr[0] != null ? arrOfStr[0] : null;
+                    String role = arrOfStr[1] != null ? arrOfStr[1] : null;
+                    name = arrOfStr[2] != null ? arrOfStr[2] : null;
+                    Log.d(TAG, "Read svcdata file - role: " + role + ", " +
+                            "topic:" + topic + ", name:" + name);
+                } else {
+                    Log.d(TAG, "No data in svcdata file");
+                }
+                inputStream.close();
+                //ret = stringBuilder.toString();
+                return true;
+            }
+        }
+        catch (FileNotFoundException e) {
+            Log.e(TAG, "File svcdata not found: " + e.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Can not read svcdata file: " + e.toString());
+        }
+        return true;
     }
 }

@@ -7,30 +7,48 @@
     android:layout_height="match_parent"
     tools:context=".ui.main.SettingsFragment">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/settingsSF"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        android:weightSum="1"
-        tools:ignore="MissingConstraints">
-        <TextView
-            android:id="@+id/nameSF"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:gravity="center"
-            android:text="Name:" />
-        <EditText
-            android:id="@+id/nameansSF"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
-            android:gravity="center"
-            android:text="Manager" />
-    </LinearLayout>
+            android:layout_height="fill_parent"
+            android:layout_marginTop="20dp">
+            <TextView
+                android:text="Name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".3"
+                android:layout_column="0" />
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/nameansSF"
+                android:layout_weight=".7"
+                android:text="Mgr1"
+                android:layout_column="1" />
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:text="Group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight=".3"
+                android:layout_column="0" />
+
+            <EditText
+                android:text="myGroup"
+                android:id="@+id/groupSF"
+                android:layout_weight=".7"
+                android:layout_column="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </TableRow>
+    </TableLayout>
 
     <LinearLayout
         android:id="@+id/gpsLogsL"
