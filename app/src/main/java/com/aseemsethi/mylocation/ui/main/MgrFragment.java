@@ -3,6 +3,7 @@ package com.aseemsethi.mylocation.ui.main;
 import static com.aseemsethi.mylocation.MainActivity.ROLE;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -25,6 +27,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.aseemsethi.mylocation.R;
 import com.aseemsethi.mylocation.databinding.MgrFragmentBinding;
 import com.aseemsethi.mylocation.myMqttService;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
@@ -122,6 +125,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 @Override
                 public void onClick(View v) {
                     v.startAnimation(buttonClick);
+                    hideKeyboard(getActivity());
                     map.clear();
                     readFromFile(getContext(),
                             binding.nameMgr.getText().toString(), false);
@@ -132,6 +136,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 @Override
                 public void onClick(View v) {
                     v.startAnimation(buttonClick);
+                    hideKeyboard(getActivity());
                     map.clear();
                     updateLastOnMap(getContext());
                 }
@@ -309,18 +314,11 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                 visible(true).
                 title(name + ":" + currentTime).
                 position(new LatLng(lat, lon)));
-        m.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(name +
-                ":" + currentTime)));
+        //m.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(name +
+        //        ":" + currentTime)));
         m.showInfoWindow();
-
-        /*
-        Marker mMarkerA = map.addMarker(new MarkerOptions().position(new LatLng(12, 34)));
-        mMarkerA.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon("Marker A")));
-        Marker mMarkerB = map.addMarker(new MarkerOptions().position(new LatLng(13, 35)));
-        mMarkerB.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon("Marker B")));
-        */
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng
-                (lat, lon), 10);
+                (lat, lon), 12);
         map.animateCamera(cameraUpdate);
     }
 
@@ -376,6 +374,15 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         } catch (Exception e){
             Log.d(TAG, "onPause: Already Unregistered recv");
         }
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        View view = activity.getCurrentFocus();
+        if (view == null) {
+            view = new View(activity);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
     @Override

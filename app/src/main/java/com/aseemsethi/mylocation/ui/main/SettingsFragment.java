@@ -137,12 +137,13 @@ public class SettingsFragment extends Fragment {
                             "Logs disabled", Toast.LENGTH_LONG).show();
                     return;
                 }
-                String str = readLogsFromFile(getContext(), "mylocation.txt");
-                binding.gpsLogs.setText("\nNum Logs: " + number);
-                binding.gpsLogs.append(str);
                 String cl = readLogsFromFile(getContext(), "clients.txt");
-                binding.gpsLogs.append("\nNum Clients: " + number);
+                binding.gpsLogs.setText("\nNum Clients: " + number);
                 binding.gpsLogs.append(cl);
+                String str = readLogsFromFile(getContext(), "mylocation.txt");
+                binding.gpsLogs.append("\nNum Logs: " + number);
+                binding.gpsLogs.append(str);
+
             }
         });
         return root;
