@@ -37,7 +37,9 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import kotlin.random.URandomKt;
 
@@ -71,6 +73,8 @@ public class myMqttService extends Service {
     String lineSeparator;
     String topic = null;
     String filename = "mylocation.txt";
+    int colorIndex = 30;
+    Map<String, Integer> colorMap = new HashMap<String, Integer>();
 
     public myMqttService() {
     }
@@ -136,7 +140,7 @@ public class myMqttService extends Service {
                     getApplicationContext(), "svcdata.txt");
             Log.d(TAG, "Role: " + role + ", " +
                     "topic:" + topic + ", name:" + name);
-            if (mqttHelper != null)
+            if ((mqttHelper != null) && (role.equals("MGR")))
                 mqttHelper.subscribeToTopic(topic);
             return START_STICKY;
         }
@@ -303,28 +307,41 @@ public class myMqttService extends Service {
             @Override
             public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
                 String msg = mqttMessage.toString();
+                String currentTime = new SimpleDateFormat("HH-mm",
+                        Locale.getDefault()).format(new Date());
                 Log.d(TAG, "MQTT Msg recvd: " + msg);
                 String[] arrOfStr = msg.split(":", 4);
                 Log.d(TAG, "MQTT Msg recvd...:" + arrOfStr[0] + " : " + arrOfStr[1] +
                         " : " + arrOfStr[2]);
-
-                Intent intent = new Intent();
-                intent.setAction("com.aseemsethi.mylocation.IdStatus");
-                intent.putExtra("name", arrOfStr[0].trim());
-                intent.putExtra("lat", arrOfStr[1].trim());
-                intent.putExtra("long", arrOfStr[2].trim());
-                String currentTime = new SimpleDateFormat("HH-mm",
-                        Locale.getDefault()).format(new Date());
-                intent.putExtra("time", currentTime.toString());
-                String saveLine = arrOfStr[0].trim() + ":" + arrOfStr[1].trim()
-                        + ":" + arrOfStr[2].trim() + ":" + currentTime;
                 if (arrOfStr[0].equals("null")) {
                     Log.d(TAG, "Name is null..not saving or broadcasting");
                 } else {
+                    boolean found = writeUniqueClientFile(arrOfStr[0].trim());
+                    if (found == false) {
+                        // Lets assign a unique color to this user
+                        colorIndex += 30;
+                        if  (colorIndex > 360)
+                            colorIndex = 10;
+                        colorMap.put(arrOfStr[0].trim(), colorIndex);
+                        Log.d(TAG, "Setting color for: " + arrOfStr[0].trim() + " to: " +
+                                colorIndex);
+                    } else {
+                        colorIndex = colorMap.get(arrOfStr[0].trim());
+                        Log.d(TAG, "Using color for: " + arrOfStr[0].trim() + " as: " +
+                                colorIndex);
+                    }
+                    Intent intent = new Intent();
+                    intent.setAction("com.aseemsethi.mylocation.IdStatus");
+                    intent.putExtra("name", arrOfStr[0].trim());
+                    intent.putExtra("lat", arrOfStr[1].trim());
+                    intent.putExtra("long", arrOfStr[2].trim());
+                    intent.putExtra("time", currentTime);
+                    intent.putExtra("color", colorIndex);
+                    String saveLine = arrOfStr[0].trim() + ":" + arrOfStr[1].trim()
+                            + ":" + arrOfStr[2].trim() + ":" + currentTime+":" + colorIndex;
                     Log.d(TAG, "Bcat/Saving to file: " + saveLine);
                     writeToFile(saveLine, getApplicationContext(), filename);
                     writeToFile(lineSeparator, getApplicationContext(), filename);
-                    writeUniqueClientFile(arrOfStr[0].trim());
                     sendBroadcast(intent);
                 }
                 sendNotification("GPS:" + arrOfStr[0] + "/" + currentTime);
@@ -337,7 +354,7 @@ public class myMqttService extends Service {
         });
     }
 
-    private void writeUniqueClientFile(String namePassed) {
+    private boolean writeUniqueClientFile(String namePassed) {
         // We write unique Clients in this file
         String nameC;
         boolean found = false;
@@ -359,7 +376,7 @@ public class myMqttService extends Service {
                     String[] arrOfStr = receiveString.split(":", 2);
                     if (arrOfStr.length < 1) {
                         Log.d(TAG, "Length = " + arrOfStr.length);
-                        return;
+                        return found;
                     }
                     Log.d(TAG, "clients Parsed..." + arrOfStr[0]);
                     nameC = arrOfStr[0];
@@ -381,7 +398,9 @@ public class myMqttService extends Service {
             writeToFile(namePassed, getApplicationContext(), "clients.txt");
             writeToFile(lineSeparator, getApplicationContext(), "clients.txt");
         }
+        return found;
     }
+
     private void writeToFile(String data, Context context, String filename) {
         try {
             try (OutputStreamWriter outputStreamWriter =

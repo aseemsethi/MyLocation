@@ -1,6 +1,7 @@
 package com.aseemsethi.mylocation.ui.main;
 
 import static com.aseemsethi.mylocation.MainActivity.ROLE;
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_BLUE;
 
 import android.Manifest;
 import android.app.Activity;
@@ -196,8 +197,9 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                                 String currentTime = arrOfStr1[3];
                                 Log.d(TAG, "Found lastLoc..." + arrOfStr1[0] + " : "
                                         + arrOfStr1[1] + " : " + arrOfStr1[2] + ":"
-                                        + arrOfStr1[3]);
-                                updateMap(arrOfStr1[0], lat, lon, currentTime);
+                                        + arrOfStr1[3] + ":" + arrOfStr1[4]);
+                                updateMap(arrOfStr1[0], lat, lon, currentTime,
+                                        Integer.parseInt(arrOfStr1[4]));
                             }
                         }
                     }
@@ -254,10 +256,12 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                     float lon = Float.parseFloat(arrOfStr[2]);
                     String currentTime = arrOfStr[3];
                     if ((nameS == null) || (nameS.equals(""))) {
-                        updateMap(arrOfStr[0], lat, lon, currentTime);
+                        updateMap(arrOfStr[0], lat, lon, currentTime,
+                                Integer.parseInt(arrOfStr[4]));
                     } else {
                         if (arrOfStr[0].equalsIgnoreCase(nameS)) {
-                            updateMap(arrOfStr[0], lat, lon, currentTime);
+                            updateMap(arrOfStr[0], lat, lon, currentTime,
+                                    Integer.parseInt(arrOfStr[4]));
                             options.add(new LatLng(lat, lon));
                             map.addPolyline(options);
                         }
@@ -301,7 +305,8 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(43.1, -87.9), 10));
         readFromFile(getContext(), null, false);
     }
-    public void updateMap(String name, float lat, float lon, String currentTime) {
+    public void updateMap(String name, float lat, float lon, String currentTime,
+                          int colorIndex) {
         if (map == null) {
             Log.d(TAG, "map is null...........................");
             return;
@@ -311,9 +316,11 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
         }
         // Updates the location and zoom of the MapView
         Marker m = map.addMarker(new MarkerOptions().
+                        position(new LatLng(lat, lon)).
                 visible(true).
-                title(name + ":" + currentTime).
-                position(new LatLng(lat, lon)));
+                icon(BitmapDescriptorFactory.
+                defaultMarker(colorIndex)).
+                title(name + ":" + currentTime));
         //m.setIcon(BitmapDescriptorFactory.fromBitmap(iconFactory.makeIcon(name +
         //        ":" + currentTime)));
         m.showInfoWindow();
@@ -338,15 +345,18 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                         intent.getStringExtra("name") + " : " +
                         intent.getStringExtra("lat") + " : " +
                         intent.getStringExtra("long") + ":" +
-                        intent.getStringExtra("time"));
+                        intent.getStringExtra("time") + ":" +
+                        intent.getIntExtra("color", 0));
                 pageViewModel.setTextOp( intent.getStringExtra("name")
                         + ":" + intent.getStringExtra("lat") +
                         ":" + intent.getStringExtra("long") +
                         ":" + intent.getStringExtra("time"));
                 float lat = Float.parseFloat(intent.getStringExtra("lat"));
                 float lon = Float.parseFloat(intent.getStringExtra("long"));
+                int colorIndex = intent.getIntExtra("color", 0);
                 String currentTime = intent.getStringExtra("time");
-                updateMap(intent.getStringExtra("name"), lat, lon, currentTime);
+                updateMap(intent.getStringExtra("name"), lat, lon, currentTime,
+                        colorIndex);
             }
         };
         getContext().getApplicationContext().registerReceiver(myRecv, filter2);

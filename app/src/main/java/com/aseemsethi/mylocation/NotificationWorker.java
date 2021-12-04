@@ -56,6 +56,8 @@ public class NotificationWorker extends ListenableWorker {
     @NonNull
     @Override
     public ListenableFuture<Result> startWork() {
+        Data idata;
+        Log.d(TAG, "startWork id: " + getId());
         return CallbackToFutureAdapter.getFuture(completer -> {
             final Data[] out = new Data[1];
             MyCallback callback = new MyCallback() {

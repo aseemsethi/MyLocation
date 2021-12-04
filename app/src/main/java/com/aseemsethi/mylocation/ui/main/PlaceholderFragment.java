@@ -41,7 +41,10 @@ import com.aseemsethi.mylocation.NotificationWorker;
 import com.aseemsethi.mylocation.R;
 import com.aseemsethi.mylocation.databinding.FragmentMainBinding;
 import com.aseemsethi.mylocation.myMqttService;
+import com.google.common.util.concurrent.ListenableFuture;
 
+import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -108,16 +111,20 @@ public class PlaceholderFragment extends Fragment {
                         .addTag("TAG_GET_GPS_DATA")
                         .setConstraints(constraints)
                         // setting a backoff on case the work needs to retry
-                        .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                        .setBackoffCriteria(BackoffPolicy.LINEAR,
+                                PeriodicWorkRequest.MIN_BACKOFF_MILLIS,
+                                TimeUnit.MILLISECONDS)
                         .build();
         PeriodicWorkRequest periodicSyncDataWork1 =
                 new PeriodicWorkRequest.Builder(NotificationWorker.class,
                         15, TimeUnit.MINUTES)
-                        .addTag("TAG_GET_GPS_DATA1")
+                        .addTag("TAG_GET_GPS_DATA")
                         .setConstraints(constraints)
                         .setInitialDelay(7, TimeUnit.MINUTES)
                         // setting a backoff on case the work needs to retry
-                        .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                        .setBackoffCriteria(BackoffPolicy.LINEAR,
+                                PeriodicWorkRequest.MIN_BACKOFF_MILLIS,
+                                TimeUnit.MILLISECONDS)
                         .build();
         btnS.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -128,13 +135,13 @@ public class PlaceholderFragment extends Fragment {
                 btnS.setClickable(false);
                 Operation op1 = mWorkManager.enqueueUniquePeriodicWork(
                         "GPS_DATA_WORK",
-                        ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
+                        ExistingPeriodicWorkPolicy.REPLACE,
                         //ExistingPeriodicWorkPolicy.REPLACE, //Existing Periodic Work policy
                         periodicSyncDataWork //work request
                 );
                 Operation op2 = mWorkManager.enqueueUniquePeriodicWork(
                         "GPS_DATA_WORK1",
-                        ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
+                        ExistingPeriodicWorkPolicy.REPLACE,
                         periodicSyncDataWork1 //work request
                 );
                 Toast.makeText(getContext(),
@@ -148,11 +155,29 @@ public class PlaceholderFragment extends Fragment {
                 v.startAnimation(buttonClick);
                 Log.d(TAG, "Cancelling periodic task");
                 btnS.setClickable(true);
-                WorkManager.getInstance(getContext()).cancelAllWorkByTag("TAG_GET_GPS_DATA");
+                WorkManager.getInstance(getContext()).
+                        cancelAllWorkByTag("TAG_GET_GPS_DATA");
                 Toast.makeText(getContext(),
                         "Cancelling GPS periodic task", Toast.LENGTH_SHORT).show();
             }
         });
+
+        mWorkManager.getWorkInfosByTagLiveData("TAG_GET_GPS_DATA")
+                .observe(getViewLifecycleOwner(), workInfo -> {
+                    Float latitude, longitude;
+                    ListIterator<WorkInfo>
+                            iterator = workInfo.listIterator();
+                    for (ListIterator<WorkInfo> iter = workInfo.listIterator();
+                         iter.hasNext(); ) {
+                        WorkInfo element = iter.next();
+                        Log.d(TAG, "getWorkInfosByTagLiveData DATA Id:" +
+                                element.getId().toString());
+                        latitude = element.getOutputData().getFloat("LAT", 0);
+                        longitude = element.getOutputData().getFloat("LON", 0);
+                        Log.d(TAG, "getWorkInfosByTagLiveData: " + latitude + ":" + longitude);
+
+                    }
+                });
 
         mWorkManager.getWorkInfoByIdLiveData(periodicSyncDataWork.getId()).
                 observe(this, new Observer<WorkInfo>() {
@@ -167,7 +192,8 @@ public class PlaceholderFragment extends Fragment {
                     //textView.append(state.toString());
                     // Some bug here TBD - get all 0s here everytime
                     //pageViewModel.setTextOp(v);
-                    Log.d(TAG, "workMgr liveData.." + state.toString());
+                    Log.d(TAG, "workMgr liveData.." + state.toString()+ "---" +
+                            workInfo.getId());
                     Log.d(TAG, "workMgr liveData.." + latitude + ":" + longitude);
                 }
             }
