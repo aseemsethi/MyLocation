@@ -3,6 +3,8 @@ package com.aseemsethi.mylocation.ui.main;
 import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.Manifest.permission.READ_PHONE_STATE;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -210,12 +212,20 @@ public class PlaceholderFragment extends Fragment {
                 ContextCompat.checkSelfPermission(getContext(),
                         ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
                 ContextCompat.checkSelfPermission(getContext(),
+                        READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(getContext(),
+                        WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(getContext(),
                         ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Should we show an explanation?
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                     ACCESS_BACKGROUND_LOCATION) ||
                     ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                             ACCESS_COARSE_LOCATION) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                            READ_PHONE_STATE) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                            WRITE_EXTERNAL_STORAGE) ||
                     ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
                             ACCESS_FINE_LOCATION)) {
                 // Show an explanation to the user *asynchronously
@@ -229,7 +239,8 @@ public class PlaceholderFragment extends Fragment {
                                 //Prompt the user once explanation has been shown
                                 ActivityCompat.requestPermissions(getActivity(),
                                         new String[]{ACCESS_BACKGROUND_LOCATION,
-                                                ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION},
+                                                ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION,
+                                        READ_PHONE_STATE, WRITE_EXTERNAL_STORAGE},
                                         MY_PERMISSIONS_REQUEST_LOCATION);
                             }
                         }).create().show();
@@ -237,8 +248,11 @@ public class PlaceholderFragment extends Fragment {
                 Log.d(TAG, "show the dialog..................");
                 // No explanation needed, we can request the permission.
                 ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{ACCESS_BACKGROUND_LOCATION, ACCESS_BACKGROUND_LOCATION,
-                                ACCESS_COARSE_LOCATION}, MY_PERMISSIONS_REQUEST_LOCATION);
+                        new String[]{ACCESS_BACKGROUND_LOCATION,
+                                ACCESS_FINE_LOCATION,
+                                ACCESS_COARSE_LOCATION,
+                        READ_PHONE_STATE, WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_LOCATION);
             }
             return false;
         } else {
@@ -256,7 +270,8 @@ public class PlaceholderFragment extends Fragment {
             case MY_PERMISSIONS_REQUEST_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
-                        && (grantResults[0] + grantResults[1] + grantResults[2]
+                        && (grantResults[0] + grantResults[1] + grantResults[2] +
+                        grantResults[3] + grantResults[4]
                         == PackageManager.PERMISSION_GRANTED)) {
                     // permission was granted, yay! Do the
                     // location-related task you need to do.
@@ -265,7 +280,6 @@ public class PlaceholderFragment extends Fragment {
                             == PackageManager.PERMISSION_GRANTED) {
                         Log.d(TAG, "Permission granted !!!");
                     }
-
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
