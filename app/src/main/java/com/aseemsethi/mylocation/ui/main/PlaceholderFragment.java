@@ -87,7 +87,7 @@ public class PlaceholderFragment extends Fragment {
         binding = FragmentMainBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        final TextView textView = binding.textView;
+        final TextView textView = binding.tv1;
         pageViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
@@ -109,8 +109,7 @@ public class PlaceholderFragment extends Fragment {
                 new PeriodicWorkRequest.Builder(NotificationWorker.class,
                         15, TimeUnit.MINUTES)
                         .addTag("TAG_GET_GPS_DATA")
-                        .setConstraints(constraints)
-                        // setting a backoff on case the work needs to retry
+                        //.setConstraints(constraints)
                         .setBackoffCriteria(BackoffPolicy.LINEAR,
                                 PeriodicWorkRequest.MIN_BACKOFF_MILLIS,
                                 TimeUnit.MILLISECONDS)
@@ -119,9 +118,8 @@ public class PlaceholderFragment extends Fragment {
                 new PeriodicWorkRequest.Builder(NotificationWorker.class,
                         15, TimeUnit.MINUTES)
                         .addTag("TAG_GET_GPS_DATA")
-                        .setConstraints(constraints)
+                        //.setConstraints(constraints)
                         .setInitialDelay(7, TimeUnit.MINUTES)
-                        // setting a backoff on case the work needs to retry
                         .setBackoffCriteria(BackoffPolicy.LINEAR,
                                 PeriodicWorkRequest.MIN_BACKOFF_MILLIS,
                                 TimeUnit.MILLISECONDS)
@@ -136,7 +134,6 @@ public class PlaceholderFragment extends Fragment {
                 Operation op1 = mWorkManager.enqueueUniquePeriodicWork(
                         "GPS_DATA_WORK",
                         ExistingPeriodicWorkPolicy.REPLACE,
-                        //ExistingPeriodicWorkPolicy.REPLACE, //Existing Periodic Work policy
                         periodicSyncDataWork //work request
                 );
                 Operation op2 = mWorkManager.enqueueUniquePeriodicWork(
