@@ -76,11 +76,22 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 v.startAnimation(buttonClick);
-                getContext().deleteFile("mylocation.txt");
                 getContext().deleteFile("svcdata.txt");
+                Toast.makeText(getContext(),
+                        "Deleting Cfg", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        final Button btnDelLogs = binding.delGPS;
+        btnDelLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.startAnimation(buttonClick);
+                binding.gpsLogs.setText("");
+                getContext().deleteFile("mylocation.txt");
                 getContext().deleteFile("clients.txt");
                 Toast.makeText(getContext(),
-                        "Deleting Cfg/logs", Toast.LENGTH_SHORT).show();
+                        "Deleting logs", Toast.LENGTH_SHORT).show();
             }
         });
 
