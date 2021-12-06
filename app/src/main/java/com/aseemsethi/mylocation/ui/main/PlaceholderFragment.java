@@ -111,7 +111,7 @@ public class PlaceholderFragment extends Fragment {
                 new PeriodicWorkRequest.Builder(NotificationWorker.class,
                         15, TimeUnit.MINUTES)
                         .addTag("TAG_GET_GPS_DATA")
-                        //.setConstraints(constraints)
+                        .setConstraints(constraints)
                         .setBackoffCriteria(BackoffPolicy.LINEAR,
                                 PeriodicWorkRequest.MIN_BACKOFF_MILLIS,
                                 TimeUnit.MILLISECONDS)
@@ -120,7 +120,7 @@ public class PlaceholderFragment extends Fragment {
                 new PeriodicWorkRequest.Builder(NotificationWorker.class,
                         15, TimeUnit.MINUTES)
                         .addTag("TAG_GET_GPS_DATA")
-                        //.setConstraints(constraints)
+                        .setConstraints(constraints)
                         .setInitialDelay(7, TimeUnit.MINUTES)
                         .setBackoffCriteria(BackoffPolicy.LINEAR,
                                 PeriodicWorkRequest.MIN_BACKOFF_MILLIS,

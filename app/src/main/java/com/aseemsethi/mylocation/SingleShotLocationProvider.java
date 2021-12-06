@@ -47,16 +47,16 @@ public class SingleShotLocationProvider {
                         "Location permissions not granted", Toast.LENGTH_LONG).show();
                 return;
             }
-            Location lastLocation = locationManager.getLastKnownLocation
-                    (LocationManager.NETWORK_PROVIDER);
-            Log.d(TAG, "Last Loc: " + lastLocation);
+            //Location lastLocation = locationManager.getLastKnownLocation
+            //        (LocationManager.NETWORK_PROVIDER);
+            //Log.d(TAG, "Last Loc: " + lastLocation);
             locationManager.requestSingleUpdate(criteria, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
                     callback.onNewLocationAvailable(new GPSCoordinates(location.getLatitude(),
                             location.getLongitude()));
                     Log.d(TAG, "onLocChanged");
-                    lastLocation.set(location);
+                    //lastLocation.set(location);
                     //locationManager.removeUpdates(this::onLocationChanged);
                 }
                 @Override
