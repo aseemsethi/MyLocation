@@ -359,7 +359,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
                         colorIndex);
             }
         };
-        getContext().getApplicationContext().registerReceiver(myRecv, filter2);
+        getContext().registerReceiver(myRecv, filter2);
     }
 
     @Override
@@ -397,6 +397,7 @@ public class MgrFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onStart() {
+        Log.d(TAG, "OnStart..");
         super.onStart();
         pageViewModel = new ViewModelProvider(this).get(PageViewModel.class);
         role = pageViewModel.getRole();

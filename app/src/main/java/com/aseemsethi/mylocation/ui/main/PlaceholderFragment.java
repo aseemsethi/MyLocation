@@ -5,12 +5,17 @@ import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.content.Context.POWER_SERVICE;
 
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -80,6 +85,17 @@ public class PlaceholderFragment extends Fragment {
         }
         pageViewModel.setIndex(index);
         checkLocationPermission();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Log.d(TAG, "Checking battery opt");
+            Intent intent = new Intent();
+            String packageName = getContext().getPackageName();
+            PowerManager pm = (PowerManager) getContext().getSystemService(POWER_SERVICE);
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + packageName));
+                startActivity(intent);
+            }
+        }
     }
 
     @Override
@@ -174,7 +190,6 @@ public class PlaceholderFragment extends Fragment {
                         latitude = element.getOutputData().getFloat("LAT", 0);
                         longitude = element.getOutputData().getFloat("LON", 0);
                         Log.d(TAG, "getWorkInfosByTagLiveData: " + latitude + ":" + longitude);
-
                     }
                 });
 
