@@ -300,6 +300,9 @@ public class myMqttService extends Service {
             @Override
             public void connectionLost(Throwable throwable) {
                 Log.d(TAG, "MQTT connection lost !!");
+                //running = false;
+                //mqttHelper.unsubscribeToTopic(topic);
+                //sendBroadcast(new Intent("RestartMqtt"));
                 mqttHelper.connect();
             }
 
@@ -317,7 +320,7 @@ public class myMqttService extends Service {
                     Log.d(TAG, "Name is null..not saving or broadcasting");
                 } else {
                     boolean found = writeUniqueClientFile(arrOfStr[0].trim());
-                    if (found == false) {
+                    if (!found) {
                         // Lets assign a unique color to this user
                         colorIndex += 30;
                         if  (colorIndex > 360)
@@ -326,10 +329,23 @@ public class myMqttService extends Service {
                         Log.d(TAG, "Setting color for: " + arrOfStr[0].trim() + " to: " +
                                 colorIndex);
                     } else {
-                        colorIndex = colorMap.get(arrOfStr[0].trim());
+                        if (colorMap.containsKey(arrOfStr[0].trim())) {
+                            colorIndex = colorMap.get(arrOfStr[0].trim());
+                        } else {
+                            colorIndex += 30;
+                            if  (colorIndex > 360)
+                                colorIndex = 10;
+                            colorMap.put(arrOfStr[0].trim(), colorIndex);
+                        }
                         Log.d(TAG, "Using color for: " + arrOfStr[0].trim() + " as: " +
                                 colorIndex);
                     }
+                    String saveLine = arrOfStr[0].trim() + ":" + arrOfStr[1].trim()
+                            + ":" + arrOfStr[2].trim() + ":" + currentTime+":" + colorIndex;
+                    Log.d(TAG, "Bcat/Saving to file: " + saveLine);
+                    writeToFile(saveLine, getApplicationContext(), filename);
+                    writeToFile(lineSeparator, getApplicationContext(), filename);
+
                     Intent intent = new Intent();
                     intent.setAction("com.aseemsethi.mylocation.IdStatus");
                     intent.putExtra("name", arrOfStr[0].trim());
@@ -337,11 +353,6 @@ public class myMqttService extends Service {
                     intent.putExtra("long", arrOfStr[2].trim());
                     intent.putExtra("time", currentTime);
                     intent.putExtra("color", colorIndex);
-                    String saveLine = arrOfStr[0].trim() + ":" + arrOfStr[1].trim()
-                            + ":" + arrOfStr[2].trim() + ":" + currentTime+":" + colorIndex;
-                    Log.d(TAG, "Bcat/Saving to file: " + saveLine);
-                    writeToFile(saveLine, getApplicationContext(), filename);
-                    writeToFile(lineSeparator, getApplicationContext(), filename);
                     sendBroadcast(intent);
                 }
                 sendNotification("GPS:" + arrOfStr[0] + "/" + currentTime);
@@ -372,20 +383,21 @@ public class myMqttService extends Service {
                 String receiveString = "";
                 StringBuilder stringBuilder = new StringBuilder();
                 while ( (receiveString = bufferedReader.readLine()) != null ) {
-                        Log.d(TAG, "Read: " + receiveString);
+                    //Log.d(TAG, "Read: " + receiveString);
                     String[] arrOfStr = receiveString.split(":", 2);
                     if (arrOfStr.length < 1) {
                         Log.d(TAG, "Length = " + arrOfStr.length);
                         return found;
                     }
-                    Log.d(TAG, "clients Parsed..." + arrOfStr[0]);
+                    Log.d(TAG, "clients parsed..." + arrOfStr[0]);
                     nameC = arrOfStr[0];
                     if (nameC.equals(namePassed)) {
                         found = true;
+                        inputStream.close();
+                        break;
                     }
                 }
                 inputStream.close();
-                //ret = stringBuilder.toString();
             }
         }
         catch (FileNotFoundException e) {
@@ -397,6 +409,8 @@ public class myMqttService extends Service {
             Log.d(TAG, "Wrote unqiue client to file: " + namePassed);
             writeToFile(namePassed, getApplicationContext(), "clients.txt");
             writeToFile(lineSeparator, getApplicationContext(), "clients.txt");
+        } else {
+            Log.d(TAG, "Not writing client name..");
         }
         return found;
     }
@@ -407,6 +421,7 @@ public class myMqttService extends Service {
                          new OutputStreamWriter(context.openFileOutput
                                  (filename, Context.MODE_APPEND))) {
                 outputStreamWriter.write(data);
+                Log.d(TAG, "Wrote to file");
                 outputStreamWriter.close();
             }
         } catch (IOException e) {
