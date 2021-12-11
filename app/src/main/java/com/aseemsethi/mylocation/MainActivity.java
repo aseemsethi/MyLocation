@@ -38,8 +38,8 @@ import java.io.InputStreamReader;
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MyLocation";
     public static final String MESSAGE_STATUS = "message_status";
-    //public static final String ROLE = "ENG";
-    public static final String ROLE = "MGR";
+    public static final String ROLE = "ENG";
+    //public static final String ROLE = "MGR";
     LocationManager locationManager;
     String provider;
     BroadcastReceiver myReceiverMqtt = null;

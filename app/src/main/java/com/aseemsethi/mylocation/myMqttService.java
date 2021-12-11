@@ -223,11 +223,6 @@ public class myMqttService extends Service {
         Notification noti;
         Uri ringtoneUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Log.d(TAG, "Send Notification...");
-        /*
-        String[] arrOfStr = msg.split(":", 4);
-        String title = arrOfStr[0].trim();
-        String body = arrOfStr[1].trim() + ":" + arrOfStr[2].trim();
-         */
 
         // Create an explicit intent for an Activity in your app
         Intent intent = new Intent(this, MainActivity.class);
@@ -454,14 +449,13 @@ public class myMqttService extends Service {
     public void onTaskRemoved(Intent rootIntent) {
         Log.d(TAG, "Mqtt Service task removed");
         super.onTaskRemoved(rootIntent);
-        //running = false; - else we get multiple MSG RECVD for same message
+        running = false;
+        mqttHelper.unsubscribeToTopic(topic);
         sendBroadcast(new Intent("RestartMqtt"));
-/*
         Context context = getApplicationContext();
         Intent serviceIntent = new Intent(context, myMqttService.class);
         serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
-        serviceIntent.putExtra("topic", "aseemsethi");
-        startService(serviceIntent); */
+        startService(serviceIntent);
     }
 
     @Override
@@ -477,5 +471,9 @@ public class myMqttService extends Service {
         mqttHelper.unsubscribeToTopic(topic);
         sendBroadcast(new Intent("RestartMqtt"));
         // The service is no longer used and is being destroyed
+        Context context = getApplicationContext();
+        Intent serviceIntent = new Intent(context, myMqttService.class);
+        serviceIntent.setAction(myMqttService.MQTTSUBSCRIBE_ACTION);
+        startService(serviceIntent);
     }
 }
